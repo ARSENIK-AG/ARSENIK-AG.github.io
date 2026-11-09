@@ -180,7 +180,7 @@ button.bwcard.disc{display:block;width:100%;text-align:left}
 .addday{width:100%;padding:13px;border:1px dashed var(--line);border-radius:var(--r);color:var(--mut);font-weight:600;font-size:14px;margin-bottom:6px}
 
 .cg{display:flex;gap:8px;margin-top:14px}
-.cgc{display:flex;gap:5px;flex:1;justify-content:flex-end}
+.cgc{display:flex;gap:5px;flex:1;justify-content:flex-start}
 .cgcol{display:flex;flex-direction:column;gap:5px;flex:1;max-width:24px;align-items:stretch}
 .cg .sq{width:100%;aspect-ratio:1;height:auto;border-radius:5px}
 .sq.on{background:var(--c,var(--acc));box-shadow:0 0 8px color-mix(in srgb,var(--c,var(--acc)) 30%,transparent)}
@@ -218,7 +218,17 @@ button.wkrow{width:100%;text-align:left}
 .cgwrap{overflow-x:visible}
 
 .cg:not(.cgall){overflow:hidden}
-.cg:not(.cgall) .cgc{justify-content:flex-end;overflow:hidden;min-width:0;padding:3px}
+.cg:not(.cgall) .cgc{justify-content:flex-start;overflow:hidden;min-width:0;padding:3px}
+
+.addrow{display:flex;gap:8px}.addrow .addday{flex:1}
+.day.rest{padding:12px 16px;background:#14161a;border-style:dashed}
+.day.rest h3{font-size:20px;color:var(--mut)}
+.day.rest .st.done{background:#2a2e37;color:var(--txt)}
+.cg .sq.restsq{background:#1c1f25;border:1px dashed #333842}
+.cg .sq.restsq.r{background:#3a3f4a;border-color:#3a3f4a}
+.dots .sq.restdot{background:#1c1f25;border:1px dashed #333842}
+.dots .sq.restdot.r{background:#3a3f4a;border-color:#3a3f4a}
+.restcard{padding:10px 16px;border-style:dashed}
 </style></head><body><div id="app"></div><script id="state" type="application/json">{"cycle":1,"days":[{"id":"chest-back","name":"Chest & Back","color":"cb","exercises":[{"id":"e3","name":"Chest Press Machine"},{"id":"e2","name":"Upper Back Machine"},{"id":"e1","name":"Inclined Dumbbell Press"},{"id":"e4","name":"Cable Rows"},{"id":"e5","name":"Lat Pulldown"}]},{"id":"bi-tri","name":"Bi & Tri","color":"bt","exercises":[{"id":"e10","name":"JM Press"},{"id":"e17","name":"Incline Dumbbell Curl"},{"id":"e8","name":"SA Tricep Extension (Figure-8) ×2 → V-Bar Pushdown"},{"id":"e9","name":"Zigzag Bar Curl"},{"id":"e18","name":"Hammer Preacher Curl"},{"id":"e12","name":"Forearm Kitty Curl"}]},{"id":"shoulders","name":"Shoulders & Core","color":"sh","exercises":[{"id":"e14","name":"Shoulder Press Machine"},{"id":"e13","name":"Lateral Raises — Cables"},{"id":"e15","name":"Reverse Fly"},{"id":"e16","name":"Ab Machine"}]}],"log":{},"nextId":20,"bw":[],"archived":[]}</script><script>
 (function(){
 var EMBED=JSON.parse(document.getElementById('state').textContent);
@@ -239,7 +249,9 @@ function entry(c,dayId,exId,create){var L=S.log;if(!L[c]){if(!create)return null
 function blankSets(c,dayId,exId){var p=prevEntry(c,dayId,exId),n=p?Math.max(1,p.e.sets.filter(function(s){return s[0]!==''||s[1]!==''}).length):3;var a=[];for(var i=0;i<n;i++)a.push(['','']);return a}
 function hasData(e){if(!e)return false;if(e.note)return true;return e.sets.some(function(s){return s[0]!==''||s[1]!==''})}
 function exHasAny(dayId,exId){for(var c in S.log){if(hasData(entry(c,dayId,exId)))return true}return false}
-function dayStatus(c,dayId){var D=entry(c,dayId);if(!D)return 'todo';if(D.done)return 'done';for(var k in D.ex)if(hasData(D.ex[k]))return 'prog';return 'todo'}
+function WD(){return S.days.filter(function(d){return !d.rest})}
+function dayStatus(c,dayId){var d=day(dayId);if(d&&d.rest){var D=entry(c,dayId);if(D&&D.done)return 'done';var idx=S.days.indexOf(d),later=false;for(var k=idx+1;k<S.days.length;k++){var o=S.days[k];if(!o.rest&&wStatus(c,o.id)!=='todo')later=true}if(later)return 'done';if(c<S.cycle&&WD().every(function(w){return wStatus(c,w.id)==='done'}))return 'done';return 'todo'}return wStatus(c,dayId)}
+function wStatus(c,dayId){var D=entry(c,dayId);if(!D)return 'todo';if(D.done)return 'done';for(var k in D.ex)if(hasData(D.ex[k]))return 'prog';return 'todo'}
 function prevEntry(c,dayId,exId){for(var k=c-1;k>=1;k--){var e=entry(k,dayId,exId);if(hasData(e))return{c:k,e:e}}return null}
 function fmtSet(s){if(s[0]===''&&s[1]==='')return '';return (s[0]===''?'–':s[0])+(s[1]!==''?' × '+s[1]:'')}
 function num(v){var n=parseFloat(String(v).replace(',','.'));return isNaN(n)?null:n}
@@ -305,18 +317,18 @@ function bwCard(){
 }
 
 function home(){
- var c=viewCycle||S.cycle, done=0;
- S.days.forEach(function(d){if(dayStatus(c,d.id)==='done')done++});
+ var c=viewCycle||S.cycle, done=0, NW=WD().length;
+ WD().forEach(function(d){if(dayStatus(c,d.id)==='done')done++});
  if(fresh)return '<div class="onb"><div class="logo">'+LOGO+'</div><h1>Gym Tracker</h1><p>Import the data file you got from Claude to bring in your cycles 1–12 and your weight history, or start empty.</p><label class="big" style="display:block;text-align:center">Import data file<input type="file" accept=".json,application/json" id="impfile" hidden></label><button class="big ghost" id="startfresh">Start empty</button></div>';
  var h='<div class="top"><div class="brand">Cycle Tracker</div><div style="display:flex;gap:8px"><button class="iconbtn" data-go="cardio" aria-label="Cardio">'+ICON.run+'</button><button class="iconbtn" data-go="weight" aria-label="Body weight">'+ICON.scale+'</button><button class="iconbtn" data-go="history" aria-label="Progress">'+ICON.chart+'</button><button class="iconbtn" data-go="settings" aria-label="Settings">'+ICON.gear+'</button></div></div>';
- h+='<div class="hero"><div style="flex:1;position:relative;z-index:1;min-width:0"><div class="lbl">'+(c===S.cycle?'Current cycle':'Past cycle')+'</div><h1>Cycle '+c+'</h1><div class="sub">'+(done===S.days.length?'All days done 💪':(S.days.length-done)+' day'+(S.days.length-done===1?'':'s')+' left')+'</div>';
+ h+='<div class="hero"><div style="flex:1;position:relative;z-index:1;min-width:0"><div class="lbl">'+(c===S.cycle?'Current cycle':'Past cycle')+'</div><h1>Cycle '+c+'</h1><div class="sub">'+(done===NW?'All days done 💪':(NW-done)+' workout'+(NW-done===1?'':'s')+' left')+'</div>';
  if(S.cycle>1){h+='<div class="cyclenav" id="cnav">';for(var k=1;k<=S.cycle;k++)h+='<button class="pill'+(k===c?' on':'')+'" data-cyc="'+k+'">C'+k+'</button>';h+='</div>'}
- h+='</div>'+ring(done,S.days.length)+'</div>';
+ h+='</div>'+ring(done,NW)+'</div>';
  h+='<div class="sect"><span>Workouts</span></div>';
  var nxt=null;S.days.forEach(function(d){if(!nxt&&dayStatus(c,d.id)!=='done')nxt=d.id});
- S.days.forEach(function(d){var st=dayStatus(c,d.id),D=entry(c,d.id);var isN=c===S.cycle&&d.id===nxt;var lab={done:'Done ✓',prog:'In progress',todo:isN?'Up next':'Start'}[st];if(isN&&st==='todo')st='next';h+='<button class="day'+(isN?' isnext':'')+'" data-go="c'+c+'-'+d.id+'"><div class="bar" style="background:var(--'+d.color+')"></div><div style="min-width:0"><h3>'+esc(d.name)+'</h3><div class="meta">'+d.exercises.length+' exercise'+(d.exercises.length===1?'':'s')+(D&&D.date?' · '+esc(D.date):'')+'</div></div><div class="st '+st+'">'+lab+'</div></button>'});
- h+='<button class="addday" id="addday">+ Add workout day</button>';
- if(c===S.cycle)h+='<button class="big'+(done===S.days.length?'':' ghost')+'" id="newcyc" style="margin-top:8px">Start Cycle '+(S.cycle+1)+' →</button>';
+ S.days.forEach(function(d){if(d.rest){var rs=dayStatus(c,d.id),isR=c===S.cycle&&d.id===nxt;h+='<button class="day rest'+(isR?' isnext':'')+'" data-restday="'+c+'|'+d.id+'"><div class="bar" style="background:#3a3f4a"></div><div style="min-width:0"><h3>'+esc(d.name)+'</h3><div class="meta">Recover · tap to mark</div></div><div class="st '+(rs==='done'?'done':isR?'next':'')+'">'+(rs==='done'?'Rested ✓':isR?'Up next':'Rest')+'</div></button>';return}var st=dayStatus(c,d.id),D=entry(c,d.id);var isN=c===S.cycle&&d.id===nxt;var lab={done:'Done ✓',prog:'In progress',todo:isN?'Up next':'Start'}[st];if(isN&&st==='todo')st='next';h+='<button class="day'+(isN?' isnext':'')+'" data-go="c'+c+'-'+d.id+'"><div class="bar" style="background:var(--'+d.color+')"></div><div style="min-width:0"><h3>'+esc(d.name)+'</h3><div class="meta">'+d.exercises.length+' exercise'+(d.exercises.length===1?'':'s')+(D&&D.date?' · '+esc(D.date):'')+'</div></div><div class="st '+st+'">'+lab+'</div></button>'});
+ h+='<div class="addrow"><button class="addday" id="addday">+ Workout day</button><button class="addday" id="addrest">+ Rest day</button></div>';
+ if(c===S.cycle)h+='<button class="big'+(done===NW?'':' ghost')+'" id="newcyc" style="margin-top:8px">Start Cycle '+(S.cycle+1)+' →</button>';
  else h+='<button class="big ghost" data-cyc="'+S.cycle+'" style="margin-top:8px">Back to current cycle</button>';
  h+='<div style="height:18px"></div>'+discCard()+'<div style="height:12px"></div>'+bwCard()+'<div style="height:12px"></div>'+cardioCard();
  var lb=S.lastBackup||0;if(Date.now()-lb>14*864e5)h+='<button class="warn" data-go="settings" style="width:100%;text-align:left;margin-top:16px">Your data lives on this phone only. Tap to download a backup'+(lb?' — last one was '+Math.floor((Date.now()-lb)/864e5)+' days ago':'')+'.</button>';
@@ -362,11 +374,11 @@ function stopRest(){clearInterval(restT);restT=null;var el=document.getElementBy
 function tickRest(){var left=Math.max(0,Math.ceil((restEnd-Date.now())/1000)),el=restEl();el.className=left?'':'over';el.innerHTML='<span>'+(left?'Rest':'Go!')+'</span><b>'+Math.floor(left/60)+':'+pad(left%60)+'</b><button id="reststop">'+(left?'Stop':'Done')+'</button>';if(!left){clearInterval(restT);try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}setTimeout(function(){if(Date.now()-restEnd>4000)stopRest()},4500)}}
 var histEx=null;
 function history(){
- var all=[];S.days.forEach(function(d){d.exercises.forEach(function(x){all.push({d:d.id,x:x})})});
+ var all=[];WD().forEach(function(d){d.exercises.forEach(function(x){all.push({d:d.id,x:x})})});
  S.archived.forEach(function(a){all.push({d:a.day,x:a,old:true})});
  if(!histEx||!all.some(function(a){return a.x.id===histEx}))histEx=all.length?all[0].x.id:null;
  var h='<div class="top"><button class="iconbtn" data-go="">'+ICON.back+'</button><div class="brand">Progress</div><div style="width:40px"></div></div><h2 style="font-size:34px;font-weight:800;margin-bottom:6px">Progress</h2>';
- S.days.forEach(function(d){h+='<div class="sect" style="margin-top:14px"><span style="color:var(--'+d.color+')">'+esc(d.name)+'</span></div><div class="chips">';d.exercises.forEach(function(x){h+='<button class="chip'+(x.id===histEx?' on':'')+'" data-hx="'+x.id+'">'+esc(x.name)+'</button>'});h+='</div>'});
+ WD().forEach(function(d){h+='<div class="sect" style="margin-top:14px"><span style="color:var(--'+d.color+')">'+esc(d.name)+'</span></div><div class="chips">';d.exercises.forEach(function(x){h+='<button class="chip'+(x.id===histEx?' on':'')+'" data-hx="'+x.id+'">'+esc(x.name)+'</button>'});h+='</div>'});
  if(S.archived.length){h+='<div class="sect" style="margin-top:14px"><span>Old exercises</span></div><div class="chips">';S.archived.forEach(function(x){h+='<button class="chip'+(x.id===histEx?' on':'')+'" data-hx="'+x.id+'">'+esc(x.name)+'</button>'});h+='</div>'}
  var cur=all.filter(function(a){return a.x.id===histEx})[0];
  if(cur){var rows=[];for(var c=1;c<=S.cycle;c++){var e=entry(c,cur.d,cur.x.id);if(hasData(e))rows.push({c:c,e:e,b:bestW(e)})}
@@ -436,12 +448,12 @@ function cardioDays(){var c={};S.cardio.forEach(function(x){c[x.n]=1});return c}
 function dayKind(n,G,C){return G[n]?'gym':C[n]?'cardio':''}
 function weekStartN(n){var dow=(dateOfN(n).getDay()+1)%7;return n-dow}
 function cycDays(c){return S.days.map(function(d){return{d:d,st:dayStatus(c,d.id),D:entry(c,d.id)}})}
-function cycSpan(c){var ns=[];S.days.forEach(function(d){var D=entry(c,d.id);if(D&&D.n)ns.push(D.n)});if(!ns.length)return '';var a=Math.min.apply(0,ns),b=Math.max.apply(0,ns);return a===b?fmtN(a):fmtN(a).split(' ')[0]+(dateOfN(a).getMonth()===dateOfN(b).getMonth()?'':' '+fmtN(a).split(' ')[1])+'–'+fmtN(b)}
-function cycDone(c){return S.days.every(function(d){return dayStatus(c,d.id)==='done'})}
+function cycSpan(c){var ns=[];WD().forEach(function(d){var D=entry(c,d.id);if(D&&D.n)ns.push(D.n)});if(!ns.length)return '';var a=Math.min.apply(0,ns),b=Math.max.apply(0,ns);return a===b?fmtN(a):fmtN(a).split(' ')[0]+(dateOfN(a).getMonth()===dateOfN(b).getMonth()?'':' '+fmtN(a).split(' ')[1])+'–'+fmtN(b)}
+function cycDone(c){return WD().every(function(d){return dayStatus(c,d.id)==='done'})}
 function discStats(){var done=0;for(var c=1;c<=S.cycle;c++)if(cycDone(c))done++;
  var streak=0,k=cycDone(S.cycle)?S.cycle:S.cycle-1;while(k>=1&&cycDone(k)){streak++;k--}
- var tot=0,got=0;for(c=1;c<=S.cycle;c++)S.days.forEach(function(d){if(c<S.cycle||dayStatus(c,d.id)!=='todo'){tot++;if(dayStatus(c,d.id)==='done')got++}});
- var cur=S.days.filter(function(d){return dayStatus(S.cycle,d.id)==='done'}).length;
+ var tot=0,got=0;for(c=1;c<=S.cycle;c++)WD().forEach(function(d){if(c<S.cycle||dayStatus(c,d.id)!=='todo'){tot++;if(dayStatus(c,d.id)==='done')got++}});
+ var cur=WD().filter(function(d){return dayStatus(S.cycle,d.id)==='done'}).length;
  return{done:done,streak:streak,pct:tot?Math.round(got/tot*100):0,cur:cur}}
 function nextUp(){for(var i=0;i<S.days.length;i++)if(dayStatus(S.cycle,S.days[i].id)!=='done')return S.days[i].id;return null}
 var discAll=false;
@@ -449,20 +461,21 @@ function cgrid(n,big){var from=Math.max(1,S.cycle-n+1),nx=nextUp(),h='<div class
  
  h+='<div class="cgc">';
  for(var c=from;c<=S.cycle;c++){h+='<div class="cgcol">'+(big?'<span class="cgn'+(c===S.cycle?' cur':'')+'">'+((c===1||c%5===0||c===S.cycle)?c:'')+'</span>':'');
-  S.days.forEach(function(d){var st=dayStatus(c,d.id),cls='sq '+(st==='done'?'on':st==='prog'?'half':'off')+(c===S.cycle&&d.id===nx?' today':'');var sty=st!=='todo'?' style="--c:var(--'+d.color+')"':'';h+=big?'<button class="'+cls+'"'+sty+' data-go="c'+c+'-'+d.id+'" aria-label="Cycle '+c+' '+esc(d.name)+'"></button>':'<i class="'+cls+'"'+sty+'></i>'});
-  h+='<i class="sq rest'+(cycDone(c)?' r':'')+'"></i></div>'}
+  S.days.forEach(function(d){var st=dayStatus(c,d.id);if(d.rest){h+='<i class="sq restsq'+(st==='done'?' r':'')+(c===S.cycle&&d.id===nx?' today':'')+'"></i>';return}var cls='sq '+(st==='done'?'on':st==='prog'?'half':'off')+(c===S.cycle&&d.id===nx?' today':'');var sty=st!=='todo'?' style="--c:var(--'+d.color+')"':'';h+=big?'<button class="'+cls+'"'+sty+' data-go="c'+c+'-'+d.id+'" aria-label="Cycle '+c+' '+esc(d.name)+'"></button>':'<i class="'+cls+'"'+sty+'></i>'});
+  if(!S.days.some(function(d){return d.rest}))h+='<i class="sq rest'+(cycDone(c)?' r':'')+'"></i>';h+='</div>'}
  return h+'</div></div>'}
-function discCard(){var st=discStats(),T=S.days.length;return '<button class="bwcard disc" data-go="discipline"><div style="text-align:left"><div class="lbl">Discipline</div><div class="bwv" style="color:var(--acc)">'+st.cur+'<small>/'+T+' this cycle</small></div><div class="bwd">'+(st.streak?'🔥 '+st.streak+' full cycle'+(st.streak===1?'':'s')+' in a row':'Finish all '+T+' days to start a streak')+'</div></div>'+cgrid(30,false)+'</button>'}
-function discView(){var st=discStats(),T=S.days.length;
+function discCard(){var st=discStats(),T=WD().length;return '<button class="bwcard disc" data-go="discipline"><div style="text-align:left"><div class="lbl">Discipline</div><div class="bwv" style="color:var(--acc)">'+st.cur+'<small>/'+T+' this cycle</small></div><div class="bwd">'+(st.streak?'🔥 '+st.streak+' full cycle'+(st.streak===1?'':'s')+' in a row':'Finish all '+T+' days to start a streak')+'</div></div>'+cgrid(30,false)+'</button>'}
+function discView(){var st=discStats(),T=WD().length;
  var h='<div class="top"><button class="iconbtn" data-go="">'+ICON.back+'</button><div class="brand">Discipline</div><div style="width:40px"></div></div><h2 style="font-size:34px;font-weight:800">Discipline</h2>';
  h+='<div class="hcard"><div class="stats"><div><div class="lbl">This cycle</div><b>'+st.cur+'<small>/'+T+'</small></b><span>Cycle '+S.cycle+'</span></div><div><div class="lbl">Streak</div><b>'+st.streak+'</b><span>full cycles</span></div><div><div class="lbl">Completed</div><b>'+st.done+'</b><span>'+st.pct+'% of days</span></div></div>';
- h+='<div class="cghead"><span class="lbl">'+(discAll||S.cycle<=18?'All '+S.cycle+' cycles':'Latest cycles')+'</span>'+(S.cycle>18||discAll?'<button class="pill" id="discall">'+(discAll?'Show less':'Expand ⤢')+'</button>':'')+'</div><div class="cgwrap">'+cgrid(discAll?S.cycle:30,true)+'</div><div class="legend">'+S.days.map(function(d){return '<span><i class="sq on" style="--c:var(--'+d.color+')"></i>'+esc(d.name)+'</span>'}).join('')+'<span><i class="sq off"></i>Missed</span><span><i class="sq rbar"></i>Rest</span></div><div class="hint" style="margin-top:8px">Each column is one cycle, in your order, then rest. Tap a square to open that workout.</div></div>';
- var rows='';for(var c=S.cycle;c>=1;c--){var cnt=0,dots='';S.days.forEach(function(d){var s2=dayStatus(c,d.id);if(s2==='done')cnt++;dots+='<i class="sq sm '+(s2==='done'?'on':s2==='prog'?'half':'off')+'" style="--c:var(--'+d.color+')"></i>'});dots+='<i class="sq sm rest'+(cnt===T?' r':'')+'"></i>';var sp=cycSpan(c);rows+='<button class="wkrow" data-cyc="'+c+'" data-go=""><span><b style="color:var(--txt);font-weight:600">Cycle '+c+'</b>'+(sp?' · '+sp:'')+'</span><div class="dots">'+dots+'</div><b class="'+(cnt===T?'dnc':c<S.cycle?'upc':'')+'">'+cnt+'/'+T+'</b></button>'}
+ h+='<div class="cghead"><span class="lbl">'+(discAll||S.cycle<=18?'All '+S.cycle+' cycles':'Latest cycles')+'</span>'+(S.cycle>18||discAll?'<button class="pill" id="discall">'+(discAll?'Show less':'Expand ⤢')+'</button>':'')+'</div><div class="cgwrap">'+cgrid(discAll?S.cycle:30,true)+'</div><div class="legend">'+WD().map(function(d){return '<span><i class="sq on" style="--c:var(--'+d.color+')"></i>'+esc(d.name)+'</span>'}).join('')+'<span><i class="sq off"></i>Missed</span><span><i class="sq rbar"></i>Rest</span></div><div class="hint" style="margin-top:8px">Each column is one cycle, in your order, then rest. Tap a square to open that workout.</div></div>';
+ var rows='';for(var c=S.cycle;c>=1;c--){var cnt=0,dots='';S.days.forEach(function(d){var s2=dayStatus(c,d.id);if(d.rest){dots+='<i class="sq sm restdot'+(s2==='done'?' r':'')+'"></i>';return}if(s2==='done')cnt++;dots+='<i class="sq sm '+(s2==='done'?'on':s2==='prog'?'half':'off')+'" style="--c:var(--'+d.color+')"></i>'});if(!S.days.some(function(d){return d.rest}))dots+='<i class="sq sm rest'+(cnt===T?' r':'')+'"></i>';var sp=cycSpan(c);rows+='<button class="wkrow" data-cyc="'+c+'" data-go=""><span><b style="color:var(--txt);font-weight:600">Cycle '+c+'</b>'+(sp?' · '+sp:'')+'</span><div class="dots">'+dots+'</div><b class="'+(cnt===T?'dnc':c<S.cycle?'upc':'')+'">'+cnt+'/'+T+'</b></button>'}
  h+='<div class="sect"><span>By cycle</span><span>'+S.cycle+' cycles</span></div><div class="hcard" style="padding:6px 16px">'+rows+'</div>';
  return h}
 var DCOL=['cb','bt','sh','d4','d5','d6'];
-function addDay(){textModal('New workout day','e.g. Legs',function(v){var used=S.days.map(function(d){return d.color});var col=DCOL.filter(function(c){return used.indexOf(c)<0})[0]||DCOL[S.days.length%DCOL.length];var id='day'+(S.nextId++);S.days.push({id:id,name:v,color:col,exercises:[]});save('Added '+v);pendingEdit=true;location.hash='c'+S.cycle+'-'+id})}
-function removeDay(id){var d=day(id);if(!d)return;if(S.days.length<=1){toast('Keep at least one day');return}modal('Remove '+d.name+'?','It disappears from your cycles. Exercises with history stay under Old exercises in Progress.','Remove',function(){d.exercises.forEach(function(x){if(exHasAny(id,x.id))S.archived.push({id:x.id,name:x.name,day:id})});S.days=S.days.filter(function(z){return z.id!==id});if(!S.oldDays)S.oldDays=[];S.oldDays.push({id:id,name:d.name});save('Removed '+d.name);go('')},true)}
+function addRest(){var id='rest'+(S.nextId++);S.days.push({id:id,name:'Rest',rest:true,color:'rest',exercises:[]});save('Rest day added');var sy=window.scrollY;render();window.scrollTo(0,sy)}
+function addDay(){textModal('New workout day','e.g. Legs',function(v){var used=S.days.map(function(d){return d.color});var col=DCOL.filter(function(c){return used.indexOf(c)<0})[0]||DCOL[WD().length%DCOL.length];var id='day'+(S.nextId++);S.days.push({id:id,name:v,color:col,exercises:[]});save('Added '+v);pendingEdit=true;location.hash='c'+S.cycle+'-'+id})}
+function removeDay(id){var d=day(id);if(!d)return;if(!d.rest&&WD().length<=1){toast('Keep at least one workout day');return}if(d.rest){S.days=S.days.filter(function(z){return z.id!==id});save('Rest day removed');var sy0=window.scrollY;render();window.scrollTo(0,sy0);return}modal('Remove '+d.name+'?','It disappears from your cycles. Exercises with history stay under Old exercises in Progress.','Remove',function(){d.exercises.forEach(function(x){if(exHasAny(id,x.id))S.archived.push({id:x.id,name:x.name,day:id})});S.days=S.days.filter(function(z){return z.id!==id});if(!S.oldDays)S.oldDays=[];S.oldDays.push({id:id,name:d.name});save('Removed '+d.name);go('')},true)}
 function moveDay(id,dir){var i=S.days.findIndex(function(d){return d.id===id}),j=i+dir;if(j<0||j>=S.days.length)return;var t=S.days[i];S.days[i]=S.days[j];S.days[j]=t;save();var sy=window.scrollY;render();window.scrollTo(0,sy)}
 function weightView(){
  var L=bwSorted();
@@ -486,9 +499,9 @@ function weightView(){
 function settings(){
  var h='<div class="top"><button class="iconbtn" data-go="">'+ICON.back+'</button><div class="brand">Settings</div><div style="width:40px"></div></div><h2 style="font-size:34px;font-weight:800">Settings</h2>';
  h+='<div class="hcard"><div class="lbl" style="margin-bottom:8px">Current cycle</div><div style="display:flex;align-items:center;gap:12px"><button class="sm" data-cadj="-1" style="width:48px;font-size:22px">−</button><div class="cond" style="font-size:30px;font-weight:700;flex:1;text-align:center">Cycle '+S.cycle+'</div><button class="sm" data-cadj="1" style="width:48px;font-size:22px">+</button></div></div>';
- h+='<div class="sect"><span>Workout days</span><span>'+S.days.length+' per cycle</span></div>';
- S.days.forEach(function(d,i){h+='<div class="hcard"><div class="edrow" style="margin-top:0"><input class="dayname" data-dayname="'+d.id+'" value="'+esc(d.name)+'" style="color:var(--'+d.color+')"><button class="sm" data-dmv="'+d.id+'|-1">'+ICON.up+'</button><button class="sm" data-dmv="'+d.id+'|1">'+ICON.down+'</button></div>'+exEditRows(d)+'<div style="display:flex;justify-content:space-between"><button class="addset" data-addex="'+d.id+'">+ Add exercise</button><button class="addset" style="color:#d0707a" data-rmday="'+d.id+'">Remove day</button></div></div>'});
- h+='<button class="big ghost" id="addday">+ Add workout day</button>';
+ h+='<div class="sect"><span>Your cycle</span><span>'+WD().length+' workouts'+(S.days.length>WD().length?' + '+(S.days.length-WD().length)+' rest':'')+'</span></div>';
+ S.days.forEach(function(d,i){if(d.rest){h+='<div class="hcard restcard"><div class="edrow" style="margin-top:0"><input class="dayname" data-dayname="'+d.id+'" value="'+esc(d.name)+'" style="color:var(--mut)"><button class="sm" data-dmv="'+d.id+'|-1">'+ICON.up+'</button><button class="sm" data-dmv="'+d.id+'|1">'+ICON.down+'</button><button class="sm del" data-rmday="'+d.id+'">'+ICON.x+'</button></div></div>';return}h+='<div class="hcard"><div class="edrow" style="margin-top:0"><input class="dayname" data-dayname="'+d.id+'" value="'+esc(d.name)+'" style="color:var(--'+d.color+')"><button class="sm" data-dmv="'+d.id+'|-1">'+ICON.up+'</button><button class="sm" data-dmv="'+d.id+'|1">'+ICON.down+'</button></div>'+exEditRows(d)+'<div style="display:flex;justify-content:space-between"><button class="addset" data-addex="'+d.id+'">+ Add exercise</button><button class="addset" style="color:#d0707a" data-rmday="'+d.id+'">Remove day</button></div></div>'});
+ h+='<div class="row2"><button class="big ghost" id="addday">+ Workout day</button><button class="big ghost" id="addrest">+ Rest day</button></div>';
  if(S.archived.length){h+='<div class="sect"><span>Removed exercises</span></div><div class="hcard"><div style="font-size:13px;color:var(--mut);margin-bottom:4px">Their history stays in Progress. Restore puts one back in its day.</div>';S.archived.forEach(function(a){var dd=day(a.day);h+='<div class="edrow"><div style="flex:1;font-size:15px">'+esc(a.name)+'<div style="font-size:12px;color:var(--mut)">'+esc(dd?dd.name:'')+'</div></div><button class="pill" data-unarch="'+a.id+'">Restore</button></div>'});h+='</div>'}
  h+='<div class="sect"><span>Backup</span></div><div class="hcard"><div style="font-size:14px;color:var(--mut);margin-bottom:10px">Everything is stored on this phone. Download a backup now and then and keep it in Files or iCloud Drive.'+(S.lastBackup?' Last backup: '+new Date(S.lastBackup).toLocaleDateString('en-GB',{day:'numeric',month:'short'})+'.':'')+'</div><div class="row2"><button class="big" id="dlbk">Download backup</button><label class="big ghost" style="text-align:center;margin-top:8px">Restore file<input type="file" accept=".json,application/json" id="impfile" hidden></label></div></div>';
  h+='<button class="big danger" id="wipe" style="margin-top:22px">Clear all logged workouts</button>';
@@ -506,6 +519,7 @@ function render(){
  else h=home();
  $('#app').innerHTML=h;
  showBar();
+ document.querySelectorAll('.cg:not(.cgall) .cgc').forEach(function(el){el.scrollLeft=el.scrollWidth});
  var cn=$('#cnav'),on=cn&&cn.querySelector('.on');if(on)cn.scrollLeft=on.offsetLeft-cn.clientWidth+on.offsetWidth+8;
 }
 
@@ -529,6 +543,8 @@ document.addEventListener('click',function(ev){
  if(t.id==='caddtype'){textModal('New cardio type','e.g. Swimming',function(v){if(S.cardioTypes.indexOf(v)<0)S.cardioTypes.push(v);cdType=v;save();keepForm()});return}
  if(t.id==='cdsave'){cdSave();return}
  if(t.id==='addday'){addDay();return}
+ if(t.id==='addrest'){addRest();return}
+ if(t.dataset.restday){var rp=t.dataset.restday.split('|'),rc=+rp[0],RD=entry(rc,rp[1],null,true);if(dayStatus(rc,rp[1])==='done'&&!RD.done){toast('Counted as rested ✓');return}RD.done=!RD.done;if(RD.done&&!RD.n&&rc===S.cycle)RD.n=todayN();save(RD.done?'Rest day ✓':'Unmarked');var sy4=window.scrollY;render();window.scrollTo(0,sy4);return}
  if(t.id==='discall'){discAll=!discAll;var sy3=window.scrollY;render();window.scrollTo(0,sy3);return}
  if(t.dataset.rmday){removeDay(t.dataset.rmday);return}
  if(t.dataset.dmv){var dm=t.dataset.dmv.split('|');moveDay(dm[0],+dm[1]);return}
@@ -540,7 +556,7 @@ document.addEventListener('click',function(ev){
  if(t.id==='dlbk'){downloadBackup();return}
  if(t.id==='startfresh'){save();render();return}
  if(t.id==='editday'||t.id==='editdone'){editMode=!editMode;render();window.scrollTo(0,0);return}
- if(t.id==='newcyc'){var c=S.cycle,left=S.days.filter(function(d){return dayStatus(c,d.id)!=='done'}).length;var doit=function(){S.cycle++;viewCycle=null;markDirty();render();save('Cycle '+S.cycle+' started')};if(left)modal('Start Cycle '+(c+1)+'?',left+' workout'+(left>1?'s':'')+' in Cycle '+c+' not finished yet. You can still go back and fill them in later.','Start',doit);else doit();return}
+ if(t.id==='newcyc'){var c=S.cycle,left=WD().filter(function(d){return dayStatus(c,d.id)!=='done'}).length;var doit=function(){S.cycle++;viewCycle=null;markDirty();render();save('Cycle '+S.cycle+' started')};if(left)modal('Start Cycle '+(c+1)+'?',left+' workout'+(left>1?'s':'')+' in Cycle '+c+' not finished yet. You can still go back and fill them in later.','Start',doit);else doit();return}
  if(t.id==='finish'&&m){var D=entry(+m[1],m[2],null,true);D.done=true;if(!D.date)D.date=today();if(!D.n)D.n=todayN();markDirty();go('');save('Workout saved 💪');return}
  if(t.id==='undone'&&m){entry(+m[1],m[2]).done=false;markDirty();render();return}
  if(t.dataset.addset&&m){entry(+m[1],m[2],t.dataset.addset,true).sets.push(['','']);markDirty();render();return}
@@ -566,6 +582,6 @@ document.addEventListener('click',function(ev){
 render();
 })();
 </script><script>
-var APP_VER="10";
+var APP_VER="11";
 (function(){try{if(!navigator.onLine)return;fetch('./index.html?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){var m=t.match(/APP_VER="(\d+)"/);if(m&&m[1]!==APP_VER){var k='wct-upd-'+m[1];if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');location.replace('./?v='+m[1])}}).catch(function(){})}catch(e){}})();
 </script></body></html>
