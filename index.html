@@ -157,7 +157,8 @@ var ICON={back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strok
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function $(s){return document.querySelector(s)}
 function day(id){for(var i=0;i<S.days.length;i++)if(S.days[i].id===id)return S.days[i]}
-function entry(c,dayId,exId,create){var L=S.log;if(!L[c]){if(!create)return null;L[c]={}}if(!L[c][dayId]){if(!create)return null;L[c][dayId]={done:false,date:'',ex:{}}}var D=L[c][dayId];if(exId==null)return D;if(!D.ex[exId]){if(!create)return null;D.ex[exId]={sets:[['',''],['',''],['','']],note:''}}return D.ex[exId]}
+function entry(c,dayId,exId,create){var L=S.log;if(!L[c]){if(!create)return null;L[c]={}}if(!L[c][dayId]){if(!create)return null;L[c][dayId]={done:false,date:'',ex:{}}}var D=L[c][dayId];if(exId==null)return D;if(!D.ex[exId]){if(!create)return null;D.ex[exId]={sets:blankSets(c,dayId,exId),note:''}}return D.ex[exId]}
+function blankSets(c,dayId,exId){var p=prevEntry(c,dayId,exId),n=p?Math.max(1,p.e.sets.filter(function(s){return s[0]!==''||s[1]!==''}).length):3;var a=[];for(var i=0;i<n;i++)a.push(['','']);return a}
 function hasData(e){if(!e)return false;if(e.note)return true;return e.sets.some(function(s){return s[0]!==''||s[1]!==''})}
 function exHasAny(dayId,exId){for(var c in S.log){if(hasData(entry(c,dayId,exId)))return true}return false}
 function dayStatus(c,dayId){var D=entry(c,dayId);if(!D)return 'todo';if(D.done)return 'done';for(var k in D.ex)if(hasData(D.ex[k]))return 'prog';return 'todo'}
@@ -257,7 +258,7 @@ function dayView(c,dayId){
  h+='<div class="dayhead"><div style="width:6px;height:34px;border-radius:6px;background:var(--'+d.color+')"></div><h2>'+esc(d.name)+'</h2></div>';
  h+='<div class="restrow"><span>Rest timer</span><button data-rest="60">1:00</button><button data-rest="90">1:30</button><button data-rest="120">2:00</button><button data-rest="180">3:00</button></div>';
  d.exercises.forEach(function(x,i){
-  var e=entry(c,dayId,x.id)||{sets:[['',''],['',''],['','']],note:''};
+  var e=entry(c,dayId,x.id)||{sets:blankSets(c,dayId,x.id),note:''};
   var p=prevEntry(c,dayId,x.id);
   var lastTxt=p?p.e.sets.map(fmtSet).filter(Boolean).map(function(s){return '<b>'+esc(s)+'</b>'}).join('  ·  '):'';
   var complete=e.sets.some(function(s){return s[0]!==''&&s[1]!==''});
