@@ -201,7 +201,7 @@ button.bwcard.disc{display:block;width:100%;text-align:left}
 .dots .sq.rest{width:6px;height:12px;border-radius:3px;background:#1e2128}
 .dots .sq.rest.r{background:#3a3f4a}
 button.wkrow{width:100%;text-align:left}
-</style></head><body><div id="app"></div><script id="state" type="application/json">{"cycle":1,"days":[{"id":"chest-back","name":"Chest & Back","color":"cb","exercises":[{"id":"e3","name":"Chest Press Machine"},{"id":"e2","name":"Upper Back Machine"},{"id":"e1","name":"Inclined Dumbbell Press"},{"id":"e4","name":"Cable Rows"},{"id":"e5","name":"Lat Pulldown"}]},{"id":"bi-tri","name":"Bi & Tri","color":"bt","exercises":[{"id":"e10","name":"JM Press"},{"id":"e17","name":"Incline Dumbbell Curl"},{"id":"e8","name":"SA Tricep Extension (Figure-8) ×2 → V-Bar Pushdown"},{"id":"e9","name":"Zigzag Bar Curl"},{"id":"e18","name":"Hammer Preacher Curl"},{"id":"e12","name":"Forearm Kitty Curl"}]},{"id":"shoulders","name":"Shoulders & Core","color":"sh","exercises":[{"id":"e14","name":"Shoulder Press Machine"},{"id":"e13","name":"Lateral Raises — Cables"},{"id":"e15","name":"Reverse Fly"},{"id":"e16","name":"Ab Machine"}]}],"log":{},"nextId":20,"bw":[],"archived":[]}</script><script>
+.legend{flex-wrap:wrap;row-gap:8px}.legend .sq.rbar{width:12px;height:5px;border-radius:3px;background:#3a3f4a}</style></head><body><div id="app"></div><script id="state" type="application/json">{"cycle":1,"days":[{"id":"chest-back","name":"Chest & Back","color":"cb","exercises":[{"id":"e3","name":"Chest Press Machine"},{"id":"e2","name":"Upper Back Machine"},{"id":"e1","name":"Inclined Dumbbell Press"},{"id":"e4","name":"Cable Rows"},{"id":"e5","name":"Lat Pulldown"}]},{"id":"bi-tri","name":"Bi & Tri","color":"bt","exercises":[{"id":"e10","name":"JM Press"},{"id":"e17","name":"Incline Dumbbell Curl"},{"id":"e8","name":"SA Tricep Extension (Figure-8) ×2 → V-Bar Pushdown"},{"id":"e9","name":"Zigzag Bar Curl"},{"id":"e18","name":"Hammer Preacher Curl"},{"id":"e12","name":"Forearm Kitty Curl"}]},{"id":"shoulders","name":"Shoulders & Core","color":"sh","exercises":[{"id":"e14","name":"Shoulder Press Machine"},{"id":"e13","name":"Lateral Raises — Cables"},{"id":"e15","name":"Reverse Fly"},{"id":"e16","name":"Ab Machine"}]}],"log":{},"nextId":20,"bw":[],"archived":[]}</script><script>
 (function(){
 var EMBED=JSON.parse(document.getElementById('state').textContent);
 var S, dirty=false, art=null, artTried=true, LSK='wct-data-v1';
@@ -427,7 +427,7 @@ function discStats(){var done=0;for(var c=1;c<=S.cycle;c++)if(cycDone(c))done++;
  return{done:done,streak:streak,pct:tot?Math.round(got/tot*100):0,cur:cur}}
 function nextUp(){for(var i=0;i<S.days.length;i++)if(dayStatus(S.cycle,S.days[i].id)!=='done')return S.days[i].id;return null}
 function cgrid(n,big){var from=Math.max(1,S.cycle-n+1),nx=nextUp(),h='<div class="cg'+(big?' cgbig':'')+'">';
- if(big){h+='<div class="cgl"><span></span>';S.days.forEach(function(d){h+='<span style="color:var(--'+d.color+')">'+esc(d.name.split(' ')[0])+'</span>'});h+='<span>Rest</span></div>'}
+ 
  h+='<div class="cgc">';
  for(var c=from;c<=S.cycle;c++){h+='<div class="cgcol">'+(big?'<span class="cgn'+(c===S.cycle?' cur':'')+'">C'+c+'</span>':'');
   S.days.forEach(function(d){var st=dayStatus(c,d.id),cls='sq '+(st==='done'?'on':st==='prog'?'half':'off')+(c===S.cycle&&d.id===nx?' today':'');var sty=st!=='todo'?' style="--c:var(--'+d.color+')"':'';h+=big?'<button class="'+cls+'"'+sty+' data-go="c'+c+'-'+d.id+'" aria-label="Cycle '+c+' '+esc(d.name)+'"></button>':'<i class="'+cls+'"'+sty+'></i>'});
@@ -437,7 +437,7 @@ function discCard(){var st=discStats(),T=S.days.length;return '<button class="bw
 function discView(){var st=discStats(),T=S.days.length;
  var h='<div class="top"><button class="iconbtn" data-go="">'+ICON.back+'</button><div class="brand">Discipline</div><div style="width:40px"></div></div><h2 style="font-size:34px;font-weight:800">Discipline</h2>';
  h+='<div class="hcard"><div class="stats"><div><div class="lbl">This cycle</div><b>'+st.cur+'<small>/'+T+'</small></b><span>Cycle '+S.cycle+'</span></div><div><div class="lbl">Streak</div><b>'+st.streak+'</b><span>full cycles</span></div><div><div class="lbl">Completed</div><b>'+st.done+'</b><span>'+st.pct+'% of days</span></div></div>';
- h+='<div class="cgwrap">'+cgrid(12,true)+'</div><div class="legend">'+S.days.map(function(d){return '<span><i class="sq on" style="--c:var(--'+d.color+')"></i>'+esc(d.name.split(' ')[0])+'</span>'}).join('')+'<span><i class="sq off"></i>Missed</span></div><div class="hint" style="margin-top:8px">Each column is one cycle, in your order, then rest. Tap a square to open that workout.</div></div>';
+ h+='<div class="cgwrap">'+cgrid(12,true)+'</div><div class="legend">'+S.days.map(function(d){return '<span><i class="sq on" style="--c:var(--'+d.color+')"></i>'+esc(d.name)+'</span>'}).join('')+'<span><i class="sq off"></i>Missed</span><span><i class="sq rbar"></i>Rest</span></div><div class="hint" style="margin-top:8px">Each column is one cycle, in your order, then rest. Tap a square to open that workout.</div></div>';
  var rows='';for(var c=S.cycle;c>=1;c--){var cnt=0,dots='';S.days.forEach(function(d){var s2=dayStatus(c,d.id);if(s2==='done')cnt++;dots+='<i class="sq sm '+(s2==='done'?'on':s2==='prog'?'half':'off')+'" style="--c:var(--'+d.color+')"></i>'});dots+='<i class="sq sm rest'+(cnt===T?' r':'')+'"></i>';var sp=cycSpan(c);rows+='<button class="wkrow" data-cyc="'+c+'" data-go=""><span><b style="color:var(--txt);font-weight:600">Cycle '+c+'</b>'+(sp?' · '+sp:'')+'</span><div class="dots">'+dots+'</div><b class="'+(cnt===T?'dnc':c<S.cycle?'upc':'')+'">'+cnt+'/'+T+'</b></button>'}
  h+='<div class="sect"><span>By cycle</span><span>'+S.cycle+' cycles</span></div><div class="hcard" style="padding:6px 16px">'+rows+'</div>';
  return h}
@@ -546,6 +546,6 @@ document.addEventListener('click',function(ev){
 render();
 })();
 </script><script>
-var APP_VER="8";
+var APP_VER="9";
 (function(){try{if(!navigator.onLine)return;fetch('./index.html?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){var m=t.match(/APP_VER="(\d+)"/);if(m&&m[1]!==APP_VER){var k='wct-upd-'+m[1];if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');location.replace('./?v='+m[1])}}).catch(function(){})}catch(e){}})();
 </script></body></html>
