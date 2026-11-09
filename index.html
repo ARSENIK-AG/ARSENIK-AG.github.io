@@ -141,6 +141,14 @@ input.dayname{font-family:"Barlow Condensed",system-ui,sans-serif;font-size:22px
 .onb p{color:var(--mut);line-height:1.5;margin:8px 0 18px}
 label.big{cursor:pointer}
 button.warn{border:0;font:inherit;font-size:12.5px}
+
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.bwedit.cdrow{grid-template-columns:58px 1fr;row-gap:3px}
+.cdrow b{font-size:15px}.cdrow em{grid-column:2;text-align:left!important;font-size:13px}
+.cdrow small{grid-column:2;color:var(--dim);font-size:12px}
+.txin{width:100%;background:var(--card2);border:1px solid transparent;border-radius:12px;padding:13px 14px;font-size:16px;outline:none}
+.txin:focus{border-color:var(--acc)}
+.chips[style*="wrap"]{overflow:visible}
 </style></head><body><div id="app"></div><script id="state" type="application/json">{"cycle":1,"days":[{"id":"chest-back","name":"Chest & Back","color":"cb","exercises":[{"id":"e3","name":"Chest Press Machine"},{"id":"e2","name":"Upper Back Machine"},{"id":"e1","name":"Inclined Dumbbell Press"},{"id":"e4","name":"Cable Rows"},{"id":"e5","name":"Lat Pulldown"}]},{"id":"bi-tri","name":"Bi & Tri","color":"bt","exercises":[{"id":"e10","name":"JM Press"},{"id":"e17","name":"Incline Dumbbell Curl"},{"id":"e8","name":"SA Tricep Extension (Figure-8) ×2 → V-Bar Pushdown"},{"id":"e9","name":"Zigzag Bar Curl"},{"id":"e18","name":"Hammer Preacher Curl"},{"id":"e12","name":"Forearm Kitty Curl"}]},{"id":"shoulders","name":"Shoulders & Core","color":"sh","exercises":[{"id":"e14","name":"Shoulder Press Machine"},{"id":"e13","name":"Lateral Raises — Cables"},{"id":"e15","name":"Reverse Fly"},{"id":"e16","name":"Ab Machine"}]}],"log":{},"nextId":20,"bw":[],"archived":[]}</script><script>
 (function(){
 var EMBED=JSON.parse(document.getElementById('state').textContent);
@@ -149,11 +157,11 @@ function clone(o){return JSON.parse(JSON.stringify(o))}
 function lsGet(){try{return JSON.parse(localStorage.getItem(LSK)||'null')}catch(e){return null}}
 function lsSet(v){try{localStorage.setItem(LSK,JSON.stringify(v));return true}catch(e){return false}}
 S=lsGet()||clone(EMBED);
-if(!S.bw)S.bw=[];if(!S.archived)S.archived=[];
+if(!S.bw)S.bw=[];if(!S.archived)S.archived=[];fixCardio(S);
 var fresh=!lsGet();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 var LOGO='<svg viewBox="0 0 64 64" width="64" height="64"><rect width="64" height="64" rx="16" fill="#c8f560"/><g fill="#0d0e11"><rect x="10" y="22" width="7" height="20" rx="2.5"/><rect x="18" y="17" width="7" height="30" rx="2.5"/><rect x="39" y="17" width="7" height="30" rx="2.5"/><rect x="47" y="22" width="7" height="20" rx="2.5"/><rect x="25" y="29" width="14" height="6" rx="2"/></g></svg>';
-var ICON={back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>',gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',pen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 15l6-6 6 6"/></svg>',down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>',x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',scale:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 8h11l2 12h-15z"/><circle cx="12" cy="5" r="2.2"/><path d="M10 14h4"/></svg>'};
+var ICON={run:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/><path d="M3.5 12h4l2-3 3 6 2-3h6"/></svg>',back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>',gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',pen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 15l6-6 6 6"/></svg>',down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>',x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',scale:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 8h11l2 12h-15z"/><circle cx="12" cy="5" r="2.2"/><path d="M10 14h4"/></svg>'};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function $(s){return document.querySelector(s)}
 function day(id){for(var i=0;i<S.days.length;i++)if(S.days[i].id===id)return S.days[i]}
@@ -178,7 +186,7 @@ function modal(title,text,okLabel,onOk,danger,inputVal){var m=document.createEle
 
 function save(msg){S.savedAt=Date.now();if(!lsSet(S)){toast('Could not save on this phone');return}fresh=false;dirty=false;if(msg)toast(msg)}
 function downloadBackup(){var blob=new Blob([JSON.stringify(S)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);var d=new Date();a.download='gym-backup-'+d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'.json';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000);S.lastBackup=Date.now();save()}
-function importObj(o){if(!o||!o.days||!o.log)throw 0;if(!o.bw)o.bw=[];if(!o.archived)o.archived=[];S=o;viewCycle=null;save('Data imported ✓');go('')}
+function importObj(o){if(!o||!o.days||!o.log)throw 0;if(!o.bw)o.bw=[];if(!o.archived)o.archived=[];fixCardio(o);S=o;viewCycle=null;save('Data imported ✓');go('')}
 function importFile(f){var r=new FileReader();r.onload=function(){try{importObj(JSON.parse(r.result))}catch(e){toast('That file isn\'t a tracker backup')}};r.readAsText(f)}
 function route(){return (location.hash||'').replace('#','')}
 function go(h){editMode=false;if(location.hash.replace('#','')===h)render();else location.hash=h;window.scrollTo(0,0)}
@@ -230,7 +238,7 @@ function home(){
  var c=viewCycle||S.cycle, done=0;
  S.days.forEach(function(d){if(dayStatus(c,d.id)==='done')done++});
  if(fresh)return '<div class="onb"><div class="logo">'+LOGO+'</div><h1>Gym Tracker</h1><p>Import the data file you got from Claude to bring in your cycles 1–12 and your weight history, or start empty.</p><label class="big" style="display:block;text-align:center">Import data file<input type="file" accept=".json,application/json" id="impfile" hidden></label><button class="big ghost" id="startfresh">Start empty</button></div>';
- var h='<div class="top"><div class="brand">Cycle Tracker</div><div style="display:flex;gap:8px"><button class="iconbtn" data-go="weight" aria-label="Body weight">'+ICON.scale+'</button><button class="iconbtn" data-go="history" aria-label="Progress">'+ICON.chart+'</button><button class="iconbtn" data-go="settings" aria-label="Settings">'+ICON.gear+'</button></div></div>';
+ var h='<div class="top"><div class="brand">Cycle Tracker</div><div style="display:flex;gap:8px"><button class="iconbtn" data-go="cardio" aria-label="Cardio">'+ICON.run+'</button><button class="iconbtn" data-go="weight" aria-label="Body weight">'+ICON.scale+'</button><button class="iconbtn" data-go="history" aria-label="Progress">'+ICON.chart+'</button><button class="iconbtn" data-go="settings" aria-label="Settings">'+ICON.gear+'</button></div></div>';
  h+='<div class="hero"><div style="flex:1;position:relative;z-index:1;min-width:0"><div class="lbl">'+(c===S.cycle?'Current cycle':'Past cycle')+'</div><h1>Cycle '+c+'</h1><div class="sub">'+(done===S.days.length?'All days done 💪':(S.days.length-done)+' day'+(S.days.length-done===1?'':'s')+' left')+'</div>';
  if(S.cycle>1){h+='<div class="cyclenav" id="cnav">';for(var k=1;k<=S.cycle;k++)h+='<button class="pill'+(k===c?' on':'')+'" data-cyc="'+k+'">C'+k+'</button>';h+='</div>'}
  h+='</div>'+ring(done,S.days.length)+'</div>';
@@ -239,7 +247,7 @@ function home(){
  S.days.forEach(function(d){var st=dayStatus(c,d.id),D=entry(c,d.id);var isN=c===S.cycle&&d.id===nxt;var lab={done:'Done ✓',prog:'In progress',todo:isN?'Up next':'Start'}[st];if(isN&&st==='todo')st='next';h+='<button class="day'+(isN?' isnext':'')+'" data-go="c'+c+'-'+d.id+'"><div class="bar" style="background:var(--'+d.color+')"></div><div style="min-width:0"><h3>'+esc(d.name)+'</h3><div class="meta">'+d.exercises.length+' exercises'+(D&&D.date?' · '+esc(D.date):'')+'</div></div><div class="st '+st+'">'+lab+'</div></button>'});
  if(c===S.cycle)h+='<button class="big'+(done===S.days.length?'':' ghost')+'" id="newcyc" style="margin-top:8px">Start Cycle '+(S.cycle+1)+' →</button>';
  else h+='<button class="big ghost" data-cyc="'+S.cycle+'" style="margin-top:8px">Back to current cycle</button>';
- h+='<div style="height:18px"></div>'+bwCard();
+ h+='<div style="height:18px"></div>'+bwCard()+'<div style="height:12px"></div>'+cardioCard();
  var lb=S.lastBackup||0;if(Date.now()-lb>14*864e5)h+='<button class="warn" data-go="settings" style="width:100%;text-align:left;margin-top:16px">Your data lives on this phone only. Tap to download a backup'+(lb?' — last one was '+Math.floor((Date.now()-lb)/864e5)+' days ago':'')+'.</button>';
  return h;
 }
@@ -303,6 +311,50 @@ function history(){
  return h;
 }
 
+
+function fixCardio(o){if(!o.cardio)o.cardio=[];if(!o.cardioTypes)o.cardioTypes=['Treadmill','Incline walk','Bike','Elliptical','Stairmaster','Rowing'];if(!o.cid)o.cid=1}
+var cdType=null,cdEdit=null,cdMetric='min';
+function curDay(){var L=bwSorted();var c=S.cardio.length?Math.max.apply(0,S.cardio.map(function(x){return x.n})):0;return Math.max(L.length?L[L.length-1].n:1,c)}
+function cardioSorted(){return S.cardio.slice().sort(function(a,b){return a.n-b.n||a.id-b.id})}
+function cdSum(fromN,toN,key){return S.cardio.filter(function(x){return x.n>=fromN&&x.n<=toN}).reduce(function(a,x){return a+(num(x[key])||0)},0)}
+function cdLine(x){var p=[];if(x.min)p.push(x.min+' min');if(x.km)p.push(x.km+' km');if(x.kcal)p.push(x.kcal+' kcal');return p.join(' · ')}
+function cardioCard(){
+ var L=cardioSorted(),last=L[L.length-1],d=curDay(),wk=cdSum(d-6,d,'min'),ns=S.cardio.filter(function(x){return x.n>=d-6&&x.n<=d}).length;
+ var h='<div class="bwcard"><button class="bwtop" data-go="cardio"><div style="flex:1;min-width:0"><div class="lbl">Cardio</div>';
+ h+='<div class="bwv" style="color:var(--bt)">'+Math.round(wk)+'<small> min</small></div><div class="bwd">last 7 days · '+ns+' session'+(ns===1?'':'s')+'</div>';
+ if(last)h+='<div class="bwd" style="margin-top:6px">Last: <b style="color:var(--txt)">'+esc(last.type)+'</b> · Day '+last.n+(cdLine(last)?' · '+esc(cdLine(last)):'')+'</div>';
+ h+='</div></button><button class="big" data-go="cardio" style="background:var(--bt);margin-top:12px">+ Log cardio</button></div>';
+ return h;
+}
+function cardioView(){
+ var ed=cdEdit!=null?S.cardio.filter(function(x){return x.id===cdEdit})[0]:null;
+ if(!cdType)cdType=ed?ed.type:(S.cardio.length?cardioSorted()[S.cardio.length-1].type:S.cardioTypes[0]);
+ var v=ed||{n:curDay(),min:'',km:'',kcal:'',note:''};
+ var h='<div class="top"><button class="iconbtn" data-go="">'+ICON.back+'</button><div class="brand">Cardio</div><div style="width:40px"></div></div><h2 style="font-size:34px;font-weight:800">Cardio</h2>';
+ h+='<div class="hcard"><div class="lbl" style="margin-bottom:8px">'+(ed?'Edit session':'Log a session')+'</div><div class="chips" style="flex-wrap:wrap">';
+ S.cardioTypes.forEach(function(t){h+='<button class="chip'+(t===cdType?' on':'')+'" data-ctype="'+esc(t)+'">'+esc(t)+'</button>'});
+ h+='<button class="chip" id="caddtype">+ Type</button></div>';
+ h+='<div class="cgrid"><div class="fld"><input id="cd_n" inputmode="numeric" value="'+esc(v.n)+'" style="padding-left:52px"><i style="left:14px;right:auto">Day</i></div><div class="fld"><input id="cd_min" inputmode="decimal" value="'+esc(v.min)+'" placeholder="Time"><i>min</i></div><div class="fld"><input id="cd_km" inputmode="decimal" value="'+esc(v.km)+'" placeholder="Distance"><i>km</i></div><div class="fld"><input id="cd_kcal" inputmode="numeric" value="'+esc(v.kcal)+'" placeholder="Calories"><i>kcal</i></div></div>';
+ h+='<input class="note" id="cd_note" value="'+esc(v.note)+'" placeholder="Notes (speed, incline, level…)"><button class="big" id="cdsave" style="background:var(--bt);margin-top:12px">'+(ed?'Save changes':'Save session')+'</button>'+(ed?'<div class="row2" style="margin-top:8px"><button class="big ghost" id="cdcancel">Cancel</button><button class="big danger" id="cddel">Delete</button></div>':'')+'</div>';
+ var L=cardioSorted();
+ if(L.length){
+  var d=curDay(),wk=cdSum(d-6,d,'min'),pw=cdSum(d-13,d-7,'min');
+  h+='<div class="hcard"><div class="stats"><div><div class="lbl">Last 7 days</div><b>'+Math.round(wk)+'<small> min</small></b><span>'+(pw?(wk-pw>=0?'+':'')+Math.round(wk-pw)+' vs week before':'Day '+(d-6)+'–'+d)+'</span></div><div><div class="lbl">Sessions</div><b>'+L.length+'</b><span>all time</span></div><div><div class="lbl">Total</div><b>'+r1(cdSum(0,1e9,'km'))+'<small> km</small></b><span>'+Math.round(cdSum(0,1e9,'min'))+' min</span></div></div>';
+  var byDay={};L.forEach(function(x){var y=num(x[cdMetric]);if(y==null)return;byDay[x.n]=(byDay[x.n]||0)+y});
+  var pts=Object.keys(byDay).map(Number).sort(function(a,b){return a-b}).slice(-40).map(function(n){return{l:'D'+n,t:'Day '+n,y:r1(byDay[n])}});
+  h+=seg('cd',[['min','Minutes'],['km','Distance'],['kcal','Calories']],cdMetric)+lineChart(pts,{unit:{min:'min',km:'km',kcal:'kcal'}[cdMetric],color:'#ff9a4d'})+'</div>';
+  h+='<div class="sect"><span>History</span><span>tap to edit</span></div><div class="hcard" style="padding:4px 16px">';
+  L.slice().reverse().forEach(function(x){h+='<div class="bwrow"><button class="bwedit cdrow" data-cdedit="'+x.id+'"><span>Day '+x.n+'</span><b>'+esc(x.type)+'</b><em style="color:var(--mut)">'+esc(cdLine(x))+'</em>'+(x.note?'<small>'+esc(x.note)+'</small>':'')+'</button></div>'});
+  h+='</div>';
+ }else h+='<div class="empty">No cardio logged yet. Pick a type, add the time, and save.</div>';
+ return h;
+}
+function textModal(title,ph,onOk){var m=document.createElement('div');m.className='modal';m.innerHTML='<div class="box"><h3>'+esc(title)+'</h3><input id="mdtx" class="txin" placeholder="'+esc(ph)+'" style="margin-bottom:16px"><div class="row2"><button class="big ghost" data-a="no">Cancel</button><button class="big" data-a="ok">Add</button></div></div>';m.onclick=function(ev){var b=ev.target.closest('[data-a]');var a=b&&b.getAttribute('data-a');if(a||ev.target===m){var v=m.querySelector('#mdtx').value.trim();m.remove();if(a==='ok'&&v)onOk(v)}};document.body.appendChild(m);m.querySelector('#mdtx').focus()}
+function keepForm(){var ids=['cd_n','cd_min','cd_km','cd_kcal','cd_note'],v={};ids.forEach(function(i){var e=$('#'+i);if(e)v[i]=e.value});render();ids.forEach(function(i){var e=$('#'+i);if(e&&v[i]!=null)e.value=v[i]})}
+function cdSave(){var n=parseInt($('#cd_n').value,10),mi=$('#cd_min').value.trim(),km=$('#cd_km').value.trim(),kc=$('#cd_kcal').value.trim(),no=$('#cd_note').value.trim();if(!(n>0)){toast('Enter a day number');return}if(!mi&&!km&&!kc){toast('Add time, distance or calories');return}
+ var o={n:n,type:cdType,min:mi?r1(num(mi)||0):'',km:km?r1(num(km)||0):'',kcal:kc?Math.round(num(kc)||0):'',note:no};
+ if(cdEdit!=null){var x=S.cardio.filter(function(z){return z.id===cdEdit})[0];for(var k in o)x[k]=o[k];cdEdit=null;save('Session updated')}else{o.id=S.cid++;S.cardio.push(o);save('Cardio saved 🔥')}
+ render();window.scrollTo(0,0)}
 function weightView(){
  var L=bwSorted();
  var h='<div class="top"><button class="iconbtn" data-go="">'+ICON.back+'</button><div class="brand">Body weight</div><div style="width:40px"></div></div><h2 style="font-size:34px;font-weight:800">Body weight</h2>';
@@ -338,6 +390,7 @@ function render(){
  else if(r==='history')h=history();
  else if(r==='settings')h=settings();
  else if(r==='weight')h=weightView();
+ else if(r==='cardio')h=cardioView();
  else h=home();
  $('#app').innerHTML=h;
  showBar();
@@ -359,7 +412,13 @@ document.addEventListener('keydown',function(ev){if(ev.key==='Enter'&&ev.target.
 document.addEventListener('click',function(ev){
  var t=ev.target.closest('button');if(!t)return;
  var r=route(),m=r.match(/^c(\d+)-(.+)$/);
- if(t.dataset.go!=null)return go(t.dataset.go);
+ if(t.dataset.go!=null){if(t.dataset.go==='cardio'){cdEdit=null;cdType=null}return go(t.dataset.go)}
+ if(t.dataset.ctype){cdType=t.dataset.ctype;document.querySelectorAll('[data-ctype]').forEach(function(b){b.classList.toggle('on',b.dataset.ctype===cdType)});return}
+ if(t.id==='caddtype'){textModal('New cardio type','e.g. Swimming',function(v){if(S.cardioTypes.indexOf(v)<0)S.cardioTypes.push(v);cdType=v;save();keepForm()});return}
+ if(t.id==='cdsave'){cdSave();return}
+ if(t.id==='cdcancel'){cdEdit=null;cdType=null;render();return}
+ if(t.dataset.cdedit){cdEdit=+t.dataset.cdedit;cdType=null;render();window.scrollTo(0,0);return}
+ if(t.id==='cddel'){var cid=cdEdit;modal('Delete session?','This cardio session will be removed.','Delete',function(){S.cardio=S.cardio.filter(function(z){return z.id!==cid});cdEdit=null;cdType=null;save('Deleted');render()},true);return}
  if(t.dataset.cyc){viewCycle=+t.dataset.cyc;return render()}
  if(t.id==='dlbk'){downloadBackup();return}
  if(t.id==='startfresh'){save();render();return}
@@ -370,7 +429,7 @@ document.addEventListener('click',function(ev){
  if(t.dataset.addset&&m){entry(+m[1],m[2],t.dataset.addset,true).sets.push(['','']);markDirty();render();return}
  if(t.dataset.rmset&&m){var es=entry(+m[1],m[2],t.dataset.rmset,true);if(es.sets.length>1)es.sets.pop();markDirty();render();return}
  if(t.dataset.hx){histEx=t.dataset.hx;var sy=window.scrollY;render();window.scrollTo(0,sy);return}
- if(t.dataset.seg){var sp=t.dataset.seg.split('|');if(sp[0]==='lift')liftMetric=sp[1];else bwRange=sp[1];var sy2=window.scrollY;render();window.scrollTo(0,sy2);return}
+ if(t.dataset.seg){var sp=t.dataset.seg.split('|');if(sp[0]==='lift')liftMetric=sp[1];else if(sp[0]==='cd')cdMetric=sp[1];else bwRange=sp[1];var sy2=window.scrollY;render();window.scrollTo(0,sy2);return}
  if(t.dataset.rest){startRest(+t.dataset.rest);return}
  if(t.id==='reststop'){stopRest();return}
  if(t.dataset.chart){histEx=t.dataset.chart;go('history');return}
