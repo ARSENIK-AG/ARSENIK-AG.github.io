@@ -347,7 +347,7 @@ function dayView(c,dayId){
   return h;
  }
  h+='<div class="dayhead"><div style="width:6px;height:34px;border-radius:6px;background:var(--'+d.color+')"></div><h2>'+esc(d.name)+'</h2></div>';
- h+='<div class="restrow"><span>Rest timer</span><button data-rest="60">1:00</button><button data-rest="90">1:30</button><button data-rest="120">2:00</button><button data-rest="180">3:00</button></div>';
+ h+='<div class="restrow"><span>Rest timer</span><button data-rest="60">1:00</button><button data-rest="90">1:30</button><button data-rest="120">2:00</button><button data-rest="180">3:00</button><button data-rest="240">4:00</button></div>';
  d.exercises.forEach(function(x,i){
   var e=entry(c,dayId,x.id)||{sets:blankSets(c,dayId,x.id),note:''};
   var p=prevEntry(c,dayId,x.id);
@@ -582,6 +582,6 @@ document.addEventListener('click',function(ev){
 render();
 })();
 </script><script>
-var APP_VER="11";
+var APP_VER="12";
 (function(){try{if(!navigator.onLine)return;fetch('./index.html?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){var m=t.match(/APP_VER="(\d+)"/);if(m&&m[1]!==APP_VER){var k='wct-upd-'+m[1];if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');location.replace('./?v='+m[1])}}).catch(function(){})}catch(e){}})();
 </script></body></html>
