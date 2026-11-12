@@ -261,6 +261,22 @@ button.wkrow{width:100%;text-align:left}
 .badge .bn{font-size:12px;font-weight:700;margin-top:4px;line-height:1.2}
 .badge .bs{font-size:10.5px;color:var(--mut);margin-top:3px}.badge.ok .bs{color:var(--acc)}
 .badge .bp{height:4px;border-radius:9px;background:#23272f;margin:6px 6px 0;overflow:hidden}.badge .bp i{display:block;height:100%;background:var(--mut)}
+
+.ftag{display:flex;flex-direction:column;gap:2px;text-align:left;width:100%;border-left:3px solid var(--fc);background:color-mix(in srgb,var(--fc) 10%,transparent);border-radius:8px;padding:7px 10px;margin:4px 0 10px;font-size:12.5px}
+.ftag b{color:var(--fc);font-size:12px;letter-spacing:.3px}
+.ftag span{color:var(--txt);line-height:1.35}
+.lastform .ftag{opacity:.85;margin-top:-4px}
+.lastform .ftag b::before{content:"Last time · ";color:var(--mut);font-weight:600}
+.fbtn{margin-left:auto;color:#b38cff}
+.fopts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.fopts button{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px 6px;font-weight:700;font-size:14px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.fopts button b{font-size:18px;color:var(--fc)}
+.fopts button.on{border-color:var(--fc);background:color-mix(in srgb,var(--fc) 16%,var(--card2))}
+textarea.txin{resize:none;font-family:inherit;line-height:1.4}
+.flist{margin-top:10px}.fli{display:grid;grid-template-columns:34px 1fr;gap:6px;align-items:start}
+.fli .cy{font-family:"Barlow Condensed",system-ui,sans-serif;font-weight:700;padding-top:9px}
+.fli .ftag{margin:4px 0}
+.hrow .ftag{margin:6px 0 0;padding:5px 8px;font-size:11.5px}
 </style></head><body><div id="app"></div><script id="state" type="application/json">{"cycle":1,"days":[{"id":"chest-back","name":"Chest & Back","color":"cb","exercises":[{"id":"e3","name":"Chest Press Machine"},{"id":"e2","name":"Upper Back Machine"},{"id":"e1","name":"Inclined Dumbbell Press"},{"id":"e4","name":"Cable Rows"},{"id":"e5","name":"Lat Pulldown"}]},{"id":"bi-tri","name":"Bi & Tri","color":"bt","exercises":[{"id":"e10","name":"JM Press"},{"id":"e17","name":"Incline Dumbbell Curl"},{"id":"e8","name":"SA Tricep Extension (Figure-8) ×2 → V-Bar Pushdown"},{"id":"e9","name":"Zigzag Bar Curl"},{"id":"e18","name":"Hammer Preacher Curl"},{"id":"e12","name":"Forearm Kitty Curl"}]},{"id":"shoulders","name":"Shoulders & Core","color":"sh","exercises":[{"id":"e14","name":"Shoulder Press Machine"},{"id":"e13","name":"Lateral Raises — Cables"},{"id":"e15","name":"Reverse Fly"},{"id":"e16","name":"Ab Machine"}]}],"log":{},"nextId":20,"bw":[],"archived":[]}</script><script>
 (function(){
 var EMBED=JSON.parse(document.getElementById('state').textContent);
@@ -279,7 +295,7 @@ function $(s){return document.querySelector(s)}
 function day(id){for(var i=0;i<S.days.length;i++)if(S.days[i].id===id)return S.days[i]}
 function entry(c,dayId,exId,create){var L=S.log;if(!L[c]){if(!create)return null;L[c]={}}if(!L[c][dayId]){if(!create)return null;L[c][dayId]={done:false,date:'',ex:{}}}var D=L[c][dayId];if(exId==null)return D;if(!D.ex[exId]){if(!create)return null;D.ex[exId]={sets:blankSets(c,dayId,exId),note:''}}return D.ex[exId]}
 function blankSets(c,dayId,exId){var p=prevEntry(c,dayId,exId),n=p?Math.max(1,p.e.sets.filter(function(s){return s[0]!==''||s[1]!==''}).length):3;var a=[];for(var i=0;i<n;i++)a.push(['','']);return a}
-function hasData(e){if(!e)return false;if(e.note)return true;return e.sets.some(function(s){return s[0]!==''||s[1]!==''})}
+function hasData(e){if(!e)return false;if(e.note||e.form)return true;return e.sets.some(function(s){return s[0]!==''||s[1]!==''})}
 function exHasAny(dayId,exId){for(var c in S.log){if(hasData(entry(c,dayId,exId)))return true}return false}
 function WD(){return S.days.filter(function(d){return !d.rest})}
 function dayStatus(c,dayId){var d=day(dayId);if(d&&d.rest){var D=entry(c,dayId);if(D&&D.done)return 'done';var idx=S.days.indexOf(d),later=false;for(var k=idx+1;k<S.days.length;k++){var o=S.days[k];if(!o.rest&&wStatus(c,o.id)!=='todo')later=true}if(later)return 'done';if(c<S.cycle&&WD().every(function(w){return wStatus(c,w.id)==='done'}))return 'done';return 'todo'}return wStatus(c,dayId)}
@@ -311,25 +327,34 @@ function ring(done,total){var r=36,c=2*Math.PI*r,p=total?done/total:0;return '<d
 function spark(pts,H,color){H=H||70;color=color||'#c8f560';if(pts.length<2)return '';var W=300,P=8,ys=pts.map(function(p){return p.y}),mn=Math.min.apply(0,ys),mx=Math.max.apply(0,ys);if(mx===mn){mx+=1;mn-=1}var xs=function(i){return P+i*(W-2*P)/(pts.length-1)},yy=function(v){return H-P-(v-mn)*(H-2*P)/(mx-mn)};var dd=pts.map(function(p,i){return (i?'L':'M')+xs(i).toFixed(1)+' '+yy(p.y).toFixed(1)}).join(' ');return '<svg class="spark" style="height:'+H+'px" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none"><path d="'+dd+'" fill="none" stroke="'+color+'" stroke-width="2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>'+(pts.length<=40?pts.map(function(p,i){return '<circle cx="'+xs(i)+'" cy="'+yy(p.y)+'" r="3.2" fill="'+color+'"/>'}).join(''):'')+'</svg>'}
 var chartN=0;
 function niceRange(mn,mx){if(mx===mn){mn-=1;mx+=1}var pad=(mx-mn)*0.15;mn-=pad;mx+=pad;var span=mx-mn,steps=[0.5,1,2,2.5,5,10,20,25,50,100,250,500,1000],st=steps[steps.length-1];for(var i=0;i<steps.length;i++)if(span/steps[i]<=4){st=steps[i];break}return{mn:Math.floor(mn/st)*st,mx:Math.ceil(mx/st)*st,st:st}}
+var FT={harder:{g:'▲',c:'#ff6b6b',l:'Harder'},easier:{g:'▼',c:'#5ab0ff',l:'Easier'},other:{g:'◆',c:'#b38cff',l:'Different'}};
+function formTag(f,btn){if(!f)return '';var k=FT[f.t]||FT.other;return '<'+(btn?'button data-form="'+btn+'"':'div')+' class="ftag" style="--fc:'+k.c+'"><b>'+k.g+' '+k.l+' form</b>'+(f.note?'<span>'+esc(f.note)+'</span>':'')+'</'+(btn?'button':'div')+'>'}
+function formModal(c,dayId,exId){var e=entry(c,dayId,exId,true),f=e.form||{t:'harder',note:''},sel=f.t;var m=document.createElement('div');m.className='modal';
+ function draw(){m.innerHTML='<div class="box"><h3>Form change</h3><p>Mark how this exercise changed in Cycle '+c+'. It shows as a flag on the progress graph.</p><div class="fopts">'+['harder','easier','other'].map(function(k){var o=FT[k];return '<button data-ft="'+k+'" class="'+(k===sel?'on':'')+'" style="--fc:'+o.c+'"><b>'+o.g+'</b>'+o.l+'</button>'}).join('')+'</div><textarea id="fnote" class="txin" rows="3" placeholder="Describe the change, e.g. slower negative, full ROM, switched to machine…">'+esc(f.note)+'</textarea><div class="row2" style="margin-top:14px">'+(e.form?'<button class="big danger" data-a="del">Remove</button>':'<button class="big ghost" data-a="no">Cancel</button>')+'<button class="big" data-a="ok">Save</button></div></div>'}
+ draw();m.onclick=function(ev){var ft=ev.target.closest('[data-ft]');if(ft){f.note=m.querySelector('#fnote').value;sel=ft.dataset.ft;draw();return}var b=ev.target.closest('[data-a]'),a=b&&b.dataset.a;if(!a&&ev.target!==m)return;var note=(m.querySelector('#fnote')||{}).value||'';m.remove();
+  if(a==='ok'){if(!note.trim()){toast('Add a short note about the change');formModal(c,dayId,exId);return}e.form={t:sel,note:note.trim()};var D=entry(c,dayId);if(!D.date)D.date=today();save('Form change saved');var sy=window.scrollY;render();window.scrollTo(0,sy)}
+  else if(a==='del'){delete e.form;save('Form change removed');var sy2=window.scrollY;render();window.scrollTo(0,sy2)}};
+ document.body.appendChild(m)}
 function lineChart(pts,o){
  o=o||{};var color=o.color||'#c8f560',unit=o.unit||'',W=340,H=o.H||190,pl=36,pr=14,pt=26,pb=26;
  if(pts.length<2)return '<div class="empty" style="padding:26px 0">'+(pts.length?'Log one more to see a trend line.':'No data yet.')+'</div>';
  var ys=pts.map(function(p){return p.y}),R=niceRange(Math.min.apply(0,ys),Math.max.apply(0,ys));
  var X=function(i){return pl+i*(W-pl-pr)/(pts.length-1)},Y=function(v){return pt+(R.mx-v)*(H-pt-pb)/(R.mx-R.mn)};
- var id='g'+(chartN++),h='<svg class="chart" viewBox="0 0 '+W+' '+H+'" data-pts=\''+esc(JSON.stringify({p:pts,u:unit,W:W,H:H,pl:pl,pr:pr,pt:pt,pb:pb,mn:R.mn,mx:R.mx}))+'\'><defs><linearGradient id="'+id+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+color+'" stop-opacity=".28"/><stop offset="1" stop-color="'+color+'" stop-opacity="0"/></linearGradient></defs>';
+ pt=pts.some(function(p){return p.f})?pt+12:pt;var id='g'+(chartN++),h='<svg class="chart" viewBox="0 0 '+W+' '+H+'" data-pts=\''+esc(JSON.stringify({p:pts,u:unit,W:W,H:H,pl:pl,pr:pr,pt:pt,pb:pb,mn:R.mn,mx:R.mx}))+'\'><defs><linearGradient id="'+id+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+color+'" stop-opacity=".28"/><stop offset="1" stop-color="'+color+'" stop-opacity="0"/></linearGradient></defs>';
  for(var v=R.mn;v<=R.mx+1e-9;v+=R.st){h+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#262a32" stroke-width="1"/><text x="'+(pl-8)+'" y="'+(Y(v)+4)+'" text-anchor="end" class="ax">'+r1(v)+'</text>'}
  var n=pts.length,every=Math.max(1,Math.ceil(n/6));
  pts.forEach(function(p,i){if(i%every===0||i===n-1){if(i!==n-1&&n-1-i<every*0.6)return;h+='<text x="'+X(i)+'" y="'+(H-6)+'" text-anchor="middle" class="ax">'+esc(p.l)+'</text>'}});
  var line=pts.map(function(p,i){return (i?'L':'M')+X(i).toFixed(1)+' '+Y(p.y).toFixed(1)}).join(' ');
  h+='<path d="'+line+' L'+X(n-1)+' '+(H-pb)+' L'+X(0)+' '+(H-pb)+'Z" fill="url(#'+id+')"/><path d="'+line+'" fill="none" stroke="'+color+'" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>';
  if(n<=30)pts.forEach(function(p,i){h+='<circle cx="'+X(i)+'" cy="'+Y(p.y)+'" r="3" fill="#16181d" stroke="'+color+'" stroke-width="2"/>'});
+ pts.forEach(function(p,i){if(!p.f)return;var k=FT[p.f.t]||FT.other,x=X(i);h+='<line x1="'+x+'" x2="'+x+'" y1="'+(pt-8)+'" y2="'+(H-pb)+'" stroke="'+k.c+'" stroke-width="1.4" stroke-dasharray="3 3" opacity=".8"/><circle cx="'+x+'" cy="'+(pt-12)+'" r="7.5" fill="'+k.c+'"/><text x="'+x+'" y="'+(pt-8.5)+'" text-anchor="middle" style="font-size:9px;fill:#111;font-weight:800">'+k.g+'</text><circle cx="'+x+'" cy="'+Y(p.y)+'" r="4.5" fill="'+k.c+'" stroke="#16181d" stroke-width="2"/>'});
  var lx=X(n-1),ly=Y(pts[n-1].y),lab=pts[n-1].y+(unit?' '+unit:''),bw=lab.length*7+14;
  h+='<g class="lastlab"><circle cx="'+lx+'" cy="'+ly+'" r="5.5" fill="'+color+'"/><rect x="'+Math.min(lx-bw/2,W-bw-2)+'" y="'+(ly-28)+'" width="'+bw+'" height="20" rx="10" fill="'+color+'"/><text x="'+(Math.min(lx-bw/2,W-bw-2)+bw/2)+'" y="'+(ly-14)+'" text-anchor="middle" class="tip">'+esc(lab)+'</text></g>';
  h+='<g class="hover" style="display:none"><line class="hl" y1="'+pt+'" y2="'+(H-pb)+'" stroke="#8b919d" stroke-dasharray="3 3"/><circle class="hc" r="6" fill="'+color+'" stroke="#0d0e11" stroke-width="2"/><rect class="hr" height="34" rx="9" fill="#f2f3f5"/><text class="ht1 tip"/><text class="ht2" style="font-size:10px;fill:#5d636e;font-family:Inter"/></g>';
  h+='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="transparent" class="hit"/></svg>';
  return h;
 }
-function chartHover(ev){var svg=ev.target.closest&&ev.target.closest('svg.chart');if(!svg)return;var D=JSON.parse(svg.getAttribute('data-pts')),b=svg.getBoundingClientRect(),cx=(ev.clientX-b.left)*D.W/b.width,n=D.p.length;var i=Math.round((cx-D.pl)/((D.W-D.pl-D.pr)/(n-1)));i=Math.max(0,Math.min(n-1,i));var p=D.p[i],x=D.pl+i*(D.W-D.pl-D.pr)/(n-1),y=D.pt+(D.mx-p.y)*(D.H-D.pt-D.pb)/(D.mx-D.mn);var g=svg.querySelector('.hover');g.style.display='';svg.querySelector('.lastlab').style.display='none';var l=g.querySelector('.hl');l.setAttribute('x1',x);l.setAttribute('x2',x);var c=g.querySelector('.hc');c.setAttribute('cx',x);c.setAttribute('cy',y);var t1=p.y+(D.u?' '+D.u:''),t2=p.t||p.l,w=Math.max(t1.length*7.4,t2.length*5.6)+18,rx=Math.max(2,Math.min(x-w/2,D.W-w-2)),ry=Math.max(0,y-44);var r=g.querySelector('.hr');r.setAttribute('x',rx);r.setAttribute('y',ry);r.setAttribute('width',w);var a=g.querySelector('.ht1');a.setAttribute('x',rx+w/2);a.setAttribute('y',ry+15);a.setAttribute('text-anchor','middle');a.textContent=t1;var bb=g.querySelector('.ht2');bb.setAttribute('x',rx+w/2);bb.setAttribute('y',ry+28);bb.setAttribute('text-anchor','middle');bb.textContent=t2}
+function chartHover(ev){var svg=ev.target.closest&&ev.target.closest('svg.chart');if(!svg)return;var D=JSON.parse(svg.getAttribute('data-pts')),b=svg.getBoundingClientRect(),cx=(ev.clientX-b.left)*D.W/b.width,n=D.p.length;var i=Math.round((cx-D.pl)/((D.W-D.pl-D.pr)/(n-1)));i=Math.max(0,Math.min(n-1,i));var p=D.p[i],x=D.pl+i*(D.W-D.pl-D.pr)/(n-1),y=D.pt+(D.mx-p.y)*(D.H-D.pt-D.pb)/(D.mx-D.mn);var g=svg.querySelector('.hover');g.style.display='';svg.querySelector('.lastlab').style.display='none';var l=g.querySelector('.hl');l.setAttribute('x1',x);l.setAttribute('x2',x);var c=g.querySelector('.hc');c.setAttribute('cx',x);c.setAttribute('cy',y);var t1=p.y+(D.u?' '+D.u:''),t2=(p.t||p.l)+(p.f?' · '+(FT[p.f.t]||FT.other).g+' '+(p.f.note.length>26?p.f.note.slice(0,25)+'…':p.f.note):''),w=Math.max(t1.length*7.4,t2.length*5.6)+18,rx=Math.max(2,Math.min(x-w/2,D.W-w-2)),ry=Math.max(0,y-44);var r=g.querySelector('.hr');r.setAttribute('x',rx);r.setAttribute('y',ry);r.setAttribute('width',w);var a=g.querySelector('.ht1');a.setAttribute('x',rx+w/2);a.setAttribute('y',ry+15);a.setAttribute('text-anchor','middle');a.textContent=t1;var bb=g.querySelector('.ht2');bb.setAttribute('x',rx+w/2);bb.setAttribute('y',ry+28);bb.setAttribute('text-anchor','middle');bb.textContent=t2}
 document.addEventListener('pointermove',chartHover);document.addEventListener('pointerdown',chartHover);
 document.addEventListener('pointerleave',function(ev){},true);
 function seg(name,opts,cur){return '<div class="seg">'+opts.map(function(o){return '<button data-seg="'+name+'|'+o[0]+'" class="'+(o[0]===cur?'on':'')+'">'+o[1]+'</button>'}).join('')+'</div>'}
@@ -387,9 +412,9 @@ function dayView(c,dayId){
   var complete=e.sets.some(function(s){return s[0]!==''&&s[1]!==''});
   var pb=priorBest(c,dayId,x.id),cb=bestW(e),isPR=pb!=null&&cb!=null&&cb>pb;
   h+='<div class="ex'+(complete?' complete':'')+'" data-card="'+x.id+'"><div class="exh"><div class="num">'+pad(i+1)+'</div><div class="n">'+esc(x.name)+' <span class="prb"'+(isPR?'':' style="display:none"')+'>PR</span></div><button class="mini" data-chart="'+x.id+'" aria-label="Chart">'+ICON.chart+'</button></div>';
-  h+='<div class="last">'+(p?'Last (C'+p.c+'): '+lastTxt+(p.e.note?' — '+esc(p.e.note):'')+(pb!=null?'<br>Best ever: <b>'+pb+' kg</b>':''):'No previous data yet')+'</div><div class="sets">';
+  h+='<div class="last">'+(p?'Last (C'+p.c+'): '+lastTxt+(p.e.note?' — '+esc(p.e.note):'')+(pb!=null?'<br>Best ever: <b>'+pb+' kg</b>':''):'No previous data yet')+'</div>'+(p&&p.e.form?'<div class="lastform">'+formTag(p.e.form)+'</div>':'')+(e.form?formTag(e.form,x.id):'')+'<div class="sets">';
   e.sets.forEach(function(s,si){var ps=p&&p.e.sets[si]||['',''];h+='<div class="set"><div class="k">'+(si+1)+'</div><div class="fld"><input inputmode="decimal" autocomplete="off" data-ex="'+x.id+'" data-s="'+si+'" data-f="0" value="'+esc(s[0])+'" placeholder="'+esc(ps[0]||'Weight')+'"><i>kg</i></div><div class="fld"><input inputmode="numeric" autocomplete="off" data-ex="'+x.id+'" data-s="'+si+'" data-f="1" value="'+esc(s[1])+'" placeholder="'+esc(ps[1]||'Reps')+'"><i>reps</i></div></div>'});
-  h+='</div><div style="display:flex;gap:14px">'+(e.sets.length<6?'<button class="addset" data-addset="'+x.id+'">+ Add set</button>':'')+(e.sets.length>1?'<button class="addset" data-rmset="'+x.id+'">− Remove set</button>':'')+'</div><input class="note" data-note="'+x.id+'" value="'+esc(e.note)+'" placeholder="Notes (seat, grip, spot…)"></div>';
+  h+='</div><div style="display:flex;gap:14px">'+(e.sets.length<6?'<button class="addset" data-addset="'+x.id+'">+ Add set</button>':'')+(e.sets.length>1?'<button class="addset" data-rmset="'+x.id+'">− Remove set</button>':'')+'<button class="addset fbtn" data-form="'+x.id+'">⚑ '+(e.form?'Edit form change':'Form change')+'</button></div><input class="note" data-note="'+x.id+'" value="'+esc(e.note)+'" placeholder="Notes (seat, grip, spot…)"></div>';
  });
  var st=dayStatus(c,dayId);
  h+='<button class="big" id="finish" style="margin-top:20px">'+(st==='done'?'Save changes':'Finish workout ✓')+'</button>';
@@ -417,11 +442,11 @@ function history(){
   h+='<div class="hcard"><h3 style="font-size:22px">'+esc(cur.x.name)+'</h3>';
   var pr=null;rows.forEach(function(r){if(r.b!=null&&(pr==null||r.b>pr.b))pr=r});
   var fn=liftMetric==='1rm'?e1rm:liftMetric==='vol'?vol:bestW;
-  var pts=rows.map(function(r){return{l:'C'+r.c,t:'Cycle '+r.c,y:fn(r.e)}}).filter(function(p){return p.y!=null});
+  var pts=rows.map(function(r){return{l:'C'+r.c,t:'Cycle '+r.c,y:fn(r.e),f:r.e.form||null}}).filter(function(p){return p.y!=null});
   if(pr){var tp=rows.filter(function(r){return r.b!=null}),diff=tp[tp.length-1].b-tp[0].b;h+='<div class="stats"><div><div class="lbl">Best</div><b>'+pr.b+'<small> kg</small></b><span>C'+pr.c+'</span></div><div><div class="lbl">Since C'+tp[0].c+'</div><b class="'+(diff>=0?'dnc':'upc')+'">'+(diff>=0?'+':'')+r1(diff)+'<small> kg</small></b><span>top set</span></div><div><div class="lbl">Logged</div><b>'+rows.length+'</b><span>cycles</span></div></div>'}
-  if(rows.length){h+=seg('lift',[['top','Top weight'],['1rm','Est. 1RM'],['vol','Volume']],liftMetric)+lineChart(pts,{unit:'kg',color:'#c8f560'});if(liftMetric==='1rm')h+='<div class="hint">Estimated one-rep max from your best set (Epley formula).</div>';if(liftMetric==='vol')h+='<div class="hint">Total kg × reps across all sets.</div>'}
+  if(rows.length){h+=seg('lift',[['top','Top weight'],['1rm','Est. 1RM'],['vol','Volume']],liftMetric)+lineChart(pts,{unit:'kg',color:'#c8f560'});if(liftMetric==='1rm')h+='<div class="hint">Estimated one-rep max from your best set (Epley formula).</div>';if(liftMetric==='vol')h+='<div class="hint">Total kg × reps across all sets.</div>';var FR=rows.filter(function(r){return r.e.form});if(FR.length){h+='<div class="flist"><div class="lbl" style="margin-bottom:6px">Form changes</div>'+FR.map(function(r){return '<div class="fli"><span class="cy">C'+r.c+'</span>'+formTag(r.e.form)+'</div>'}).join('')+'</div>'}}
   if(!rows.length)h+='<div class="empty">Nothing logged yet for this exercise.</div>';
-  rows.slice().reverse().forEach(function(r){h+='<div class="hrow"><div class="cy">C'+r.c+'</div><div class="sx">'+r.e.sets.map(fmtSet).filter(Boolean).map(function(s){return '<b>'+esc(s)+'</b>'}).join(' · ')+(r.e.note?'<div style="font-size:12px;margin-top:3px">'+esc(r.e.note)+'</div>':'')+'</div><div class="best">'+(r.b!=null?r.b+' kg':'')+'</div></div>'});
+  rows.slice().reverse().forEach(function(r){h+='<div class="hrow"><div class="cy">C'+r.c+'</div><div class="sx">'+r.e.sets.map(fmtSet).filter(Boolean).map(function(s){return '<b>'+esc(s)+'</b>'}).join(' · ')+(r.e.note?'<div style="font-size:12px;margin-top:3px">'+esc(r.e.note)+'</div>':'')+(r.e.form?formTag(r.e.form):'')+'</div><div class="best">'+(r.b!=null?r.b+' kg':'')+'</div></div>'});
   h+='</div>'}
  return h;
 }
@@ -632,6 +657,7 @@ document.addEventListener('click',function(ev){
  if(t.id==='newcyc'){var c=S.cycle,left=WD().filter(function(d){return dayStatus(c,d.id)!=='done'}).length;var doit=function(){S.cycle++;viewCycle=null;markDirty();render();save('Cycle '+S.cycle+' started')};if(left)modal('Start Cycle '+(c+1)+'?',left+' workout'+(left>1?'s':'')+' in Cycle '+c+' not finished yet. You can still go back and fill them in later.','Start',doit);else doit();return}
  if(t.id==='finish'&&m){var D=entry(+m[1],m[2],null,true);D.done=true;if(!D.date)D.date=today();if(!D.n)D.n=todayN();markDirty();go('');save('Workout saved 💪');return}
  if(t.id==='undone'&&m){entry(+m[1],m[2]).done=false;markDirty();render();return}
+ if(t.dataset.form&&m){formModal(+m[1],m[2],t.dataset.form);return}
  if(t.dataset.addset&&m){entry(+m[1],m[2],t.dataset.addset,true).sets.push(['','']);markDirty();render();return}
  if(t.dataset.rmset&&m){var es=entry(+m[1],m[2],t.dataset.rmset,true);if(es.sets.length>1)es.sets.pop();markDirty();render();return}
  if(t.dataset.hx){histEx=t.dataset.hx;var sy=window.scrollY;render();window.scrollTo(0,sy);return}
@@ -655,6 +681,6 @@ document.addEventListener('click',function(ev){
 render();
 })();
 </script><script>
-var APP_VER="13";
+var APP_VER="14";
 (function(){try{if(!navigator.onLine)return;fetch('./index.html?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){var m=t.match(/APP_VER="(\d+)"/);if(m&&m[1]!==APP_VER){var k='wct-upd-'+m[1];if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');location.replace('./?v='+m[1])}}).catch(function(){})}catch(e){}})();
 </script></body></html>
