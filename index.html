@@ -277,7 +277,22 @@ textarea.txin{resize:none;font-family:inherit;line-height:1.4}
 .fli .cy{font-family:"Barlow Condensed",system-ui,sans-serif;font-weight:700;padding-top:9px}
 .fli .ftag{margin:4px 0}
 .hrow .ftag{margin:6px 0 0;padding:5px 8px;font-size:11.5px}
-</style></head><body><div id="app"></div><script id="state" type="application/json">{"cycle":1,"days":[{"id":"chest-back","name":"Chest & Back","color":"cb","exercises":[{"id":"e3","name":"Chest Press Machine"},{"id":"e2","name":"Upper Back Machine"},{"id":"e1","name":"Inclined Dumbbell Press"},{"id":"e4","name":"Cable Rows"},{"id":"e5","name":"Lat Pulldown"}]},{"id":"bi-tri","name":"Bi & Tri","color":"bt","exercises":[{"id":"e10","name":"JM Press"},{"id":"e17","name":"Incline Dumbbell Curl"},{"id":"e8","name":"SA Tricep Extension (Figure-8) ×2 → V-Bar Pushdown"},{"id":"e9","name":"Zigzag Bar Curl"},{"id":"e18","name":"Hammer Preacher Curl"},{"id":"e12","name":"Forearm Kitty Curl"}]},{"id":"shoulders","name":"Shoulders & Core","color":"sh","exercises":[{"id":"e14","name":"Shoulder Press Machine"},{"id":"e13","name":"Lateral Raises — Cables"},{"id":"e15","name":"Reverse Fly"},{"id":"e16","name":"Ab Machine"}]}],"log":{},"nextId":20,"bw":[],"archived":[]}</script><script>
+
+.malegend{display:flex;gap:16px;font-size:11.5px;color:var(--mut);margin-top:4px}
+.malegend span{display:flex;align-items:center;gap:6px}
+.malegend i{width:16px;height:3px;border-radius:2px;display:inline-block}
+.malegend i.dash{background:repeating-linear-gradient(90deg,#f2f3f5 0 5px,transparent 5px 9px);opacity:.8}
+.goalrow{display:flex;align-items:center;gap:10px;margin:14px 0 4px;font-size:12.5px;color:var(--mut);font-weight:600}
+.wtab{margin-top:14px;font-size:13px}
+.wth,.wtr{display:grid;grid-template-columns:1.25fr 1fr .95fr .95fr 1.15fr;gap:6px;align-items:center}
+.wth{font-size:10.5px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;font-weight:600;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.wtr{padding:9px 0;border-bottom:1px solid var(--line)}
+.wtr:last-child{border-bottom:0}
+.wtr span:first-child{display:flex;flex-direction:column}
+.wtr small{color:var(--dim);font-size:10.5px}
+.wtr b{font-family:"Barlow Condensed",system-ui,sans-serif;font-size:16px}
+.wth span:not(:first-child),.wtr span:not(:first-child){text-align:right}
+.wtr.part{opacity:.6}</style></head><body><div id="app"></div><script id="state" type="application/json">{"cycle":1,"days":[{"id":"chest-back","name":"Chest & Back","color":"cb","exercises":[{"id":"e3","name":"Chest Press Machine"},{"id":"e2","name":"Upper Back Machine"},{"id":"e1","name":"Inclined Dumbbell Press"},{"id":"e4","name":"Cable Rows"},{"id":"e5","name":"Lat Pulldown"}]},{"id":"bi-tri","name":"Bi & Tri","color":"bt","exercises":[{"id":"e10","name":"JM Press"},{"id":"e17","name":"Incline Dumbbell Curl"},{"id":"e8","name":"SA Tricep Extension (Figure-8) ×2 → V-Bar Pushdown"},{"id":"e9","name":"Zigzag Bar Curl"},{"id":"e18","name":"Hammer Preacher Curl"},{"id":"e12","name":"Forearm Kitty Curl"}]},{"id":"shoulders","name":"Shoulders & Core","color":"sh","exercises":[{"id":"e14","name":"Shoulder Press Machine"},{"id":"e13","name":"Lateral Raises — Cables"},{"id":"e15","name":"Reverse Fly"},{"id":"e16","name":"Ab Machine"}]}],"log":{},"nextId":20,"bw":[],"archived":[]}</script><script>
 (function(){
 var EMBED=JSON.parse(document.getElementById('state').textContent);
 var S, dirty=false, art=null, artTried=true, LSK='wct-data-v1';
@@ -338,7 +353,7 @@ function formModal(c,dayId,exId){var e=entry(c,dayId,exId,true),f=e.form||{t:'ha
 function lineChart(pts,o){
  o=o||{};var color=o.color||'#c8f560',unit=o.unit||'',W=340,H=o.H||190,pl=36,pr=14,pt=26,pb=26;
  if(pts.length<2)return '<div class="empty" style="padding:26px 0">'+(pts.length?'Log one more to see a trend line.':'No data yet.')+'</div>';
- var ys=pts.map(function(p){return p.y}),R=niceRange(Math.min.apply(0,ys),Math.max.apply(0,ys));
+ var ys=pts.map(function(p){return p.y}).concat((o.ma||[]).filter(function(v){return v!=null})),R=niceRange(Math.min.apply(0,ys),Math.max.apply(0,ys));
  var X=function(i){return pl+i*(W-pl-pr)/(pts.length-1)},Y=function(v){return pt+(R.mx-v)*(H-pt-pb)/(R.mx-R.mn)};
  pt=pts.some(function(p){return p.f})?pt+12:pt;var id='g'+(chartN++),h='<svg class="chart" viewBox="0 0 '+W+' '+H+'" data-pts=\''+esc(JSON.stringify({p:pts,u:unit,W:W,H:H,pl:pl,pr:pr,pt:pt,pb:pb,mn:R.mn,mx:R.mx}))+'\'><defs><linearGradient id="'+id+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+color+'" stop-opacity=".28"/><stop offset="1" stop-color="'+color+'" stop-opacity="0"/></linearGradient></defs>';
  for(var v=R.mn;v<=R.mx+1e-9;v+=R.st){h+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#262a32" stroke-width="1"/><text x="'+(pl-8)+'" y="'+(Y(v)+4)+'" text-anchor="end" class="ax">'+r1(v)+'</text>'}
@@ -346,6 +361,7 @@ function lineChart(pts,o){
  pts.forEach(function(p,i){if(i%every===0||i===n-1){if(i!==n-1&&n-1-i<every*0.6)return;h+='<text x="'+X(i)+'" y="'+(H-6)+'" text-anchor="middle" class="ax">'+esc(p.l)+'</text>'}});
  var line=pts.map(function(p,i){return (i?'L':'M')+X(i).toFixed(1)+' '+Y(p.y).toFixed(1)}).join(' ');
  h+='<path d="'+line+' L'+X(n-1)+' '+(H-pb)+' L'+X(0)+' '+(H-pb)+'Z" fill="url(#'+id+')"/><path d="'+line+'" fill="none" stroke="'+color+'" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>';
+ if(o.ma){var mp=o.ma.map(function(v,i){return (i?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)}).join(' ');h+='<path d="'+mp+'" fill="none" stroke="#f2f3f5" stroke-width="2" stroke-dasharray="5 4" opacity=".75" stroke-linejoin="round"/>'}
  if(n<=30)pts.forEach(function(p,i){h+='<circle cx="'+X(i)+'" cy="'+Y(p.y)+'" r="3" fill="#16181d" stroke="'+color+'" stroke-width="2"/>'});
  pts.forEach(function(p,i){if(!p.f)return;var k=FT[p.f.t]||FT.other,x=X(i);h+='<line x1="'+x+'" x2="'+x+'" y1="'+(pt-8)+'" y2="'+(H-pb)+'" stroke="'+k.c+'" stroke-width="1.4" stroke-dasharray="3 3" opacity=".8"/><circle cx="'+x+'" cy="'+(pt-12)+'" r="7.5" fill="'+k.c+'"/><text x="'+x+'" y="'+(pt-8.5)+'" text-anchor="middle" style="font-size:9px;fill:#111;font-weight:800">'+k.g+'</text><circle cx="'+x+'" cy="'+Y(p.y)+'" r="4.5" fill="'+k.c+'" stroke="#16181d" stroke-width="2"/>'});
  var lx=X(n-1),ly=Y(pts[n-1].y),lab=pts[n-1].y+(unit?' '+unit:''),bw=lab.length*7+14;
@@ -574,6 +590,52 @@ function addRest(){var id='rest'+(S.nextId++);S.days.push({id:id,name:'Rest',res
 function addDay(){textModal('New workout day','e.g. Legs',function(v){var used=S.days.map(function(d){return d.color});var col=DCOL.filter(function(c){return used.indexOf(c)<0})[0]||DCOL[WD().length%DCOL.length];var id='day'+(S.nextId++);S.days.push({id:id,name:v,color:col,exercises:[]});save('Added '+v);pendingEdit=true;location.hash='c'+S.cycle+'-'+id})}
 function removeDay(id){var d=day(id);if(!d)return;if(!d.rest&&WD().length<=1){toast('Keep at least one workout day');return}if(d.rest){S.days=S.days.filter(function(z){return z.id!==id});save('Rest day removed');var sy0=window.scrollY;render();window.scrollTo(0,sy0);return}modal('Remove '+d.name+'?','It disappears from your cycles. Exercises with history stay under Old exercises in Progress.','Remove',function(){d.exercises.forEach(function(x){if(exHasAny(id,x.id))S.archived.push({id:x.id,name:x.name,day:id})});S.days=S.days.filter(function(z){return z.id!==id});if(!S.oldDays)S.oldDays=[];S.oldDays.push({id:id,name:d.name});save('Removed '+d.name);go('')},true)}
 function moveDay(id,dir){var i=S.days.findIndex(function(d){return d.id===id}),j=i+dir;if(j<0||j>=S.days.length)return;var t=S.days[i];S.days[i]=S.days[j];S.days[j]=t;save();var sy=window.scrollY;render();window.scrollTo(0,sy)}
+
+var bwView='avg';
+function mean(a){return a.length?a.reduce(function(x,y){return x+y},0)/a.length:null}
+function sd(a){if(a.length<2)return null;var m=mean(a);return Math.sqrt(a.reduce(function(s,x){return s+(x-m)*(x-m)},0)/(a.length-1))}
+function slope(P){if(P.length<2)return null;var mx=mean(P.map(function(p){return p.n})),my=mean(P.map(function(p){return p.w})),a=0,b=0;P.forEach(function(p){a+=(p.n-mx)*(p.w-my);b+=(p.n-mx)*(p.n-mx)});return b?a/b:null}
+function ma7(L){return L.map(function(x){var w=L.filter(function(z){return z.n<=x.n&&z.n>x.n-7});return r1(mean(w.map(function(z){return z.w})))})}
+function bwWeeks(L){var W={};L.forEach(function(x){var k=Math.ceil(x.n/7);(W[k]=W[k]||[]).push(x.w)});var out=[],prev=null;Object.keys(W).map(Number).sort(function(a,b){return a-b}).forEach(function(k){var a=W[k],av=mean(a),o={k:k,from:(k-1)*7+1,to:k*7,avg:Math.round(av*100)/100,min:Math.min.apply(0,a),max:Math.max.apply(0,a),cnt:a.length,dkg:null,dpct:null};if(prev){o.dkg=r1(av-prev.avg);o.dpct=Math.round((av-prev.avg)/prev.avg*1000)/10}out.push(o);prev=o});var ln=L[L.length-1].n;if(out.length){var lw=out[out.length-1];lw.partial=ln<lw.to}return out}
+function bwAnalysis(L){var first=L[0],last=L[L.length-1],W=bwWeeks(L),pc=W.filter(function(w){return w.dpct!=null&&!w.partial});
+ var s28=slope(L.filter(function(x){return x.n>last.n-28})),sAll=slope(L);
+ var diffs=[];for(var i=1;i<L.length;i++)if(L[i].n-L[i-1].n===1)diffs.push(L[i].w-L[i-1].w);
+ var hi=L.reduce(function(a,x){return x.w>a.w?x:a}),lo=L.reduce(function(a,x){return x.w<a.w?x:a});
+ var best=pc.length?pc.reduce(function(a,w){return w.dpct<a.dpct?w:a}):null,worst=pc.length?pc.reduce(function(a,w){return w.dpct>a.dpct?w:a}):null;
+ var ls=0;for(var j=pc.length-1;j>=0;j--){if(pc[j].dpct<0)ls++;else break}
+ var lossW=pc.filter(function(w){return w.dpct<0}).length;
+ return{first:first,last:last,W:W,rate4:s28!=null?r1(s28*7):null,rateAll:sAll!=null?r1(sAll*7):null,avgPct:pc.length?Math.round(mean(pc.map(function(w){return w.dpct}))*100)/100:null,
+  fluct:diffs.length>1?r1(sd(diffs)):null,sd28:r1(sd(L.filter(function(x){return x.n>last.n-28}).map(function(x){return x.w}))||0),
+  hi:hi,lo:lo,best:best,worst:worst,lossStreak:ls,lossW:lossW,weeksN:pc.length,
+  cons:Math.round(L.length/(last.n-first.n+1)*100),total:r1(last.w-first.w),pct:r1((last.w-first.w)/first.w*100),fromLow:r1(last.w-lo.w)}}
+function sgn(v,u){return v==null?'—':(v>0?'+':'')+v+(u||'')}
+function barChart(items){var W=340,H=170,pl=36,pr=10,pt=16,pb=24,n=items.length;if(!n)return '';var ys=items.map(function(i){return i.y}),mx=Math.max(0.5,Math.max.apply(0,ys.map(Math.abs)));mx=Math.ceil(mx);
+ var Y=function(v){return pt+(mx-v)*(H-pt-pb)/(2*mx)},bw=Math.min(22,(W-pl-pr)/n*0.7),h='<svg class="chart" viewBox="0 0 '+W+' '+H+'">';
+ [mx,mx/2,0,-mx/2,-mx].forEach(function(v){h+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="'+(v===0?'#3a3f4a':'#22262e')+'"/><text x="'+(pl-6)+'" y="'+(Y(v)+3.5)+'" text-anchor="end" class="ax">'+(v>0?'+':'')+r1(v)+'%</text>'});
+ var every=Math.max(1,Math.ceil(n/8));
+ items.forEach(function(it,i){var cx=pl+(i+0.5)*(W-pl-pr)/n,y0=Y(0),y1=Y(it.y),c=it.y<0?'#c8f560':'#ff9a4d';if(it.part)c='#6b717c';h+='<rect x="'+(cx-bw/2)+'" y="'+Math.min(y0,y1)+'" width="'+bw+'" height="'+Math.max(1.5,Math.abs(y1-y0))+'" rx="3" fill="'+c+'"/>';if(n<=10)h+='<text x="'+cx+'" y="'+(it.y<0?y1+11:y1-4)+'" text-anchor="middle" class="ax" style="fill:'+c+'">'+r1(it.y)+'</text>';if(i%every===0||i===n-1)h+='<text x="'+cx+'" y="'+(H-6)+'" text-anchor="middle" class="ax">'+it.l+'</text>'});
+ return h+'</svg>'}
+function bwAnalysisHTML(L){if(L.length<3)return '';var A=bwAnalysis(L),h='';
+ // trend
+ h+='<div class="sect"><span>Trend analysis</span></div><div class="hcard"><div class="stats"><div><div class="lbl">Rate · 4 wk</div><b class="'+(A.rate4>0?'upc':'dnc')+'">'+sgn(A.rate4)+'<small> kg/wk</small></b><span>regression</span></div><div><div class="lbl">Avg weekly</div><b class="'+(A.avgPct>0?'upc':'dnc')+'">'+sgn(A.avgPct,'%')+'</b><span>change / week</span></div><div><div class="lbl">Overall</div><b class="'+(A.rateAll>0?'upc':'dnc')+'">'+sgn(A.rateAll)+'<small> kg/wk</small></b><span>since Day '+A.first.n+'</span></div></div>';
+ h+='<div class="stats"><div><div class="lbl">Lowest</div><b>'+A.lo.w+'<small> kg</small></b><span>Day '+A.lo.n+(A.fromLow>0?' · +'+A.fromLow:'')+'</span></div><div><div class="lbl">Highest</div><b>'+A.hi.w+'<small> kg</small></b><span>Day '+A.hi.n+'</span></div><div><div class="lbl">Fluctuation</div><b>±'+(A.fluct!=null?A.fluct:'—')+'<small> kg</small></b><span>day-to-day SD</span></div></div>';
+ h+='<div class="stats"><div><div class="lbl">Loss weeks</div><b>'+A.lossW+'<small>/'+A.weeksN+'</small></b><span>'+(A.lossStreak?A.lossStreak+' in a row now':'weeks down')+'</span></div><div><div class="lbl">Best week</div><b class="dnc">'+(A.best?sgn(A.best.dpct,'%'):'—')+'</b><span>'+(A.best?'Week '+A.best.k+' · '+sgn(A.best.dkg,' kg'):'')+'</span></div><div><div class="lbl">Logging</div><b>'+A.cons+'<small>%</small></b><span>of days weighed</span></div></div></div>';
+ // goal & BMI
+ var g=num(S.bwGoal),ht=num(S.height),rate=A.rate4;h+='<div class="sect"><span>Goal & BMI</span></div><div class="hcard"><div class="cgrid" style="margin-top:0"><div class="fld"><input id="bwgoal" inputmode="decimal" value="'+esc(S.bwGoal||'')+'" placeholder="Goal weight"><i>kg</i></div><div class="fld"><input id="bwht" inputmode="numeric" value="'+esc(S.height||'')+'" placeholder="Height"><i>cm</i></div></div>';
+ if(g){var tot=A.first.w-g,done=A.first.w-A.last.w,pctG=tot>0?Math.max(0,Math.min(100,Math.round(done/tot*100))):0,rem=r1(A.last.w-g);
+  var eta=rate&&rate<0&&rem>0?Math.ceil(rem/(-rate/7)):null;
+  h+='<div class="goalrow"><span>'+A.first.w+'</span><div class="xpbar" style="flex:1;margin:0"><i style="width:'+pctG+'%;background:linear-gradient(90deg,#3d8fe0,#5ab0ff)"></i></div><span>'+g+'</span></div><div class="stats"><div><div class="lbl">To go</div><b>'+(rem>0?rem:0)+'<small> kg</small></b><span>'+pctG+'% done</span></div><div><div class="lbl">ETA</div><b>'+(rem<=0?'Done 🎉':eta!=null?'~'+Math.round(eta/7)+'<small> wk</small>':'—')+'</b><span>'+(eta!=null?'Day '+(A.last.n+eta)+' · '+fmtN(A.last.n+eta):rem<=0?'goal reached':'needs a downward trend')+'</span></div><div><div class="lbl">Needed</div><b>'+(eta!=null?r1(-rate)+'<small> kg/wk</small>':'—')+'</b><span>at current pace</span></div></div>'}
+ if(ht){var m2=Math.pow(ht/100,2),bn=r1(A.last.w/m2),bs=r1(A.first.w/m2),cat=bn<18.5?'Underweight':bn<25?'Normal':bn<30?'Overweight':bn<35?'Obese I':bn<40?'Obese II':'Obese III';
+  h+='<div class="stats"><div><div class="lbl">BMI now</div><b>'+bn+'</b><span>'+cat+'</span></div><div><div class="lbl">BMI start</div><b>'+bs+'</b><span>'+sgn(r1(bn-bs))+' change</span></div><div><div class="lbl">BMI 25 at</div><b>'+Math.round(25*m2)+'<small> kg</small></b><span>'+r1(A.last.w-25*m2)+' kg away</span></div></div>'}
+ if(!g&&!ht)h+='<div class="hint" style="margin-top:8px">Add a goal weight to see your ETA and progress, and your height for BMI.</div>';
+ h+='</div>';
+ // weekly
+ var W=A.W;h+='<div class="sect"><span>Weekly</span><span>'+W.length+' weeks · 7 days each</span></div><div class="hcard">'+seg('bwv',[['avg','Weekly average'],['pct','Weekly % change']],bwView);
+ if(bwView==='avg')h+=lineChart(W.map(function(w){return{l:'W'+w.k,t:'Week '+w.k+' · Day '+w.from+'–'+w.to,y:w.avg}}),{unit:'kg',color:'#5ab0ff'});
+ else h+=barChart(W.filter(function(w){return w.dpct!=null}).map(function(w){return{l:'W'+w.k,y:w.dpct,part:w.partial}}))+'<div class="hint">Green = weight down vs the week before, orange = up, grey = current week so far.</div>';
+ h+='<div class="wtab"><div class="wth"><span>Week</span><span>Avg</span><span>Change</span><span>%</span><span>Range</span></div>';
+ W.slice().reverse().forEach(function(w){h+='<div class="wtr'+(w.partial?' part':'')+'"><span><b>W'+w.k+'</b><small>'+(w.partial?'so far · '+w.cnt+'/7 days':'D'+w.from+'–'+w.to)+'</small></span><span>'+r1(w.avg)+'</span><span class="'+(w.dkg>0?'upc':w.dkg<0?'dnc':'')+'">'+sgn(w.dkg)+'</span><span class="'+(w.dpct>0?'upc':w.dpct<0?'dnc':'')+'">'+sgn(w.dpct,'%')+'</span><span><small>'+w.min+'–'+w.max+'</small></span></div>'});
+ return h+'</div></div>'}
 function weightView(){
  var L=bwSorted();
  var h='<div class="top"><button class="iconbtn" data-go="">'+ICON.back+'</button><div class="brand">Body weight</div><div style="width:40px"></div></div><h2 style="font-size:34px;font-weight:800">Body weight</h2>';
@@ -585,7 +647,7 @@ function weightView(){
   h+='<div class="hcard"><div class="stats"><div><div class="lbl">Latest</div><b>'+last.w+'<small> kg</small></b><span>Day '+last.n+'</span></div><div><div class="lbl">7-day avg</div><b>'+avg+'<small> kg</small></b><span>'+(pavg!=null?(avg-pavg>0?'+':'')+r1(avg-pavg)+' vs last wk':wk.length+' entries')+'</span></div><div><div class="lbl">Total</div><b class="'+(ch>0?'upc':'dnc')+'">'+(ch>0?'+':'')+r1(ch)+'<small> kg</small></b><span>'+(pct>0?'+':'')+pct+'% from D'+first.n+'</span></div></div>';
   var span={'14':14,'30':30,'90':90,'all':1e9}[bwRange]||1e9;
   var CL=L.filter(function(x){return x.n>last.n-span});
-  h+=seg('bw',[['14','14D'],['30','30D'],['90','90D'],['all','All']],bwRange)+lineChart(CL.map(function(x){return{l:'D'+x.n,t:'Day '+x.n,y:x.w}}),{unit:'kg',color:'#5ab0ff'})+'</div>';
+  h+=seg('bw',[['14','14D'],['30','30D'],['90','90D'],['all','All']],bwRange)+lineChart(CL.map(function(x){return{l:'D'+x.n,t:'Day '+x.n,y:x.w}}),{unit:'kg',color:'#5ab0ff',ma:ma7(L).slice(L.length-CL.length)})+'<div class="malegend"><span><i style="background:#5ab0ff"></i>Daily</span><span><i class="dash"></i>7-day average</span></div></div>'+bwAnalysisHTML(L);
   h+='<div class="sect"><span>History</span><span>tap to edit</span></div><div class="hcard" style="padding:4px 16px">';
   L.slice().reverse().forEach(function(x,i,arr){var pv=arr[i+1];var df=pv?r1(x.w-pv.w):null;h+='<div class="bwrow"><button class="bwedit" data-bwedit="'+x.n+'"><span>Day '+x.n+'</span><b>'+x.w+' kg</b><em class="'+(df>0?'upc':'dnc')+'">'+(df==null?'':(df>0?'+':'')+df)+'</em></button><button class="sm del" data-bwdel="'+x.n+'">'+ICON.x+'</button></div>'});
   h+='</div>';
@@ -630,7 +692,7 @@ document.addEventListener('input',function(ev){
  else if(t.dataset.ren){var p=t.dataset.ren.split('|'),d=day(p[0]);d.exercises.forEach(function(x){if(x.id===p[1])x.name=t.value});markDirty()}
  else if(t.dataset.dayname){day(t.dataset.dayname).name=t.value;markDirty()}
 });
-document.addEventListener('change',function(ev){if(ev.target.id==='impfile'&&ev.target.files[0]){var f=ev.target.files[0];if(fresh)importFile(f);else modal('Restore this file?','This replaces everything currently in the tracker.','Restore',function(){importFile(f)},true)}});
+document.addEventListener('change',function(ev){if(ev.target.id==='bwgoal'||ev.target.id==='bwht'){var v=ev.target.value.trim(),nv=num(v);if(v&&(nv==null||nv<=0)){toast('Enter a number');return}if(ev.target.id==='bwgoal')S.bwGoal=v?r1(nv):'';else S.height=v?Math.round(nv):'';save('Saved');var sy=window.scrollY;render();window.scrollTo(0,sy);return}if(ev.target.id==='impfile'&&ev.target.files[0]){var f=ev.target.files[0];if(fresh)importFile(f);else modal('Restore this file?','This replaces everything currently in the tracker.','Restore',function(){importFile(f)},true)}});
 document.addEventListener('keydown',function(ev){if(ev.key==='Enter'&&ev.target.id==='bwin'){ev.preventDefault();$('#bwlog').click()}});
 document.addEventListener('click',function(ev){
  var t=ev.target.closest('button');if(!t)return;
@@ -661,7 +723,7 @@ document.addEventListener('click',function(ev){
  if(t.dataset.addset&&m){entry(+m[1],m[2],t.dataset.addset,true).sets.push(['','']);markDirty();render();return}
  if(t.dataset.rmset&&m){var es=entry(+m[1],m[2],t.dataset.rmset,true);if(es.sets.length>1)es.sets.pop();markDirty();render();return}
  if(t.dataset.hx){histEx=t.dataset.hx;var sy=window.scrollY;render();window.scrollTo(0,sy);return}
- if(t.dataset.seg){var sp=t.dataset.seg.split('|');if(sp[0]==='lift')liftMetric=sp[1];else if(sp[0]==='cd')cdMetric=sp[1];else bwRange=sp[1];var sy2=window.scrollY;render();window.scrollTo(0,sy2);return}
+ if(t.dataset.seg){var sp=t.dataset.seg.split('|');if(sp[0]==='lift')liftMetric=sp[1];else if(sp[0]==='cd')cdMetric=sp[1];else if(sp[0]==='bwv')bwView=sp[1];else bwRange=sp[1];var sy2=window.scrollY;render();window.scrollTo(0,sy2);return}
  if(t.dataset.rest){startRest(+t.dataset.rest);return}
  if(t.id==='reststop'){stopRest();return}
  if(t.dataset.chart){histEx=t.dataset.chart;go('history');return}
@@ -681,6 +743,6 @@ document.addEventListener('click',function(ev){
 render();
 })();
 </script><script>
-var APP_VER="14";
+var APP_VER="15";
 (function(){try{if(!navigator.onLine)return;fetch('./index.html?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){var m=t.match(/APP_VER="(\d+)"/);if(m&&m[1]!==APP_VER){var k='wct-upd-'+m[1];if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');location.replace('./?v='+m[1])}}).catch(function(){})}catch(e){}})();
 </script></body></html>
