@@ -292,7 +292,27 @@ textarea.txin{resize:none;font-family:inherit;line-height:1.4}
 .wtr small{color:var(--dim);font-size:10.5px}
 .wtr b{font-family:"Barlow Condensed",system-ui,sans-serif;font-size:16px}
 .wth span:not(:first-child),.wtr span:not(:first-child){text-align:right}
-.wtr.part{opacity:.6}</style></head><body><div id="app"></div><script id="state" type="application/json">{"cycle":1,"days":[{"id":"chest-back","name":"Chest & Back","color":"cb","exercises":[{"id":"e3","name":"Chest Press Machine"},{"id":"e2","name":"Upper Back Machine"},{"id":"e1","name":"Inclined Dumbbell Press"},{"id":"e4","name":"Cable Rows"},{"id":"e5","name":"Lat Pulldown"}]},{"id":"bi-tri","name":"Bi & Tri","color":"bt","exercises":[{"id":"e10","name":"JM Press"},{"id":"e17","name":"Incline Dumbbell Curl"},{"id":"e8","name":"SA Tricep Extension (Figure-8) ×2 → V-Bar Pushdown"},{"id":"e9","name":"Zigzag Bar Curl"},{"id":"e18","name":"Hammer Preacher Curl"},{"id":"e12","name":"Forearm Kitty Curl"}]},{"id":"shoulders","name":"Shoulders & Core","color":"sh","exercises":[{"id":"e14","name":"Shoulder Press Machine"},{"id":"e13","name":"Lateral Raises — Cables"},{"id":"e15","name":"Reverse Fly"},{"id":"e16","name":"Ab Machine"}]}],"log":{},"nextId":20,"bw":[],"archived":[]}</script><script>
+.wtr.part{opacity:.6}
+.insight{border-left:3px solid var(--mut);background:#1d2027;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;font-size:13px}
+.insight b{font-size:15px}.insight span{color:var(--mut)}
+.insight.dnc{border-color:var(--acc)}.insight.dnc b{color:var(--acc)}
+.insight.upc{border-color:var(--bt)}.insight.upc b{color:var(--bt)}
+.udbar{display:flex;height:10px;border-radius:99px;overflow:hidden;margin:14px 0 6px;gap:2px}
+.udbar i{display:block}.udbar .dn{background:var(--acc)}.udbar .fl{background:#3a3f4a}.udbar .up{background:var(--bt)}
+.udleg{display:flex;justify-content:space-between;font-size:12px;color:var(--mut)}
+.msr{display:grid;grid-template-columns:24px 1fr auto;gap:10px;align-items:center;padding:11px 0;border-top:1px solid var(--line);font-size:13px;color:var(--mut)}
+.msr:first-child{border-top:0}
+.msr .msi{width:22px;height:22px;border-radius:50%;border:1.5px dashed #3a3f4a;display:grid;place-items:center;font-size:12px;font-weight:800}
+.msr.ok .msi{background:var(--acc);border:0;color:#111}
+.msr b{color:var(--txt);font-size:14px}.msr.ok span:last-child{color:var(--acc)}
+.wdp{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.wdc{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11.5px}
+.wdc span{color:var(--mut);font-weight:600}.wdc small{font-size:10px;color:var(--dim)}
+.wdb{position:relative;width:100%;height:90px;background:linear-gradient(transparent calc(50% - .5px),#3a3f4a calc(50% - .5px),#3a3f4a calc(50% + .5px),transparent calc(50% + .5px))}
+.wdb i{position:absolute;left:22%;right:22%;max-height:50%;border-radius:4px}
+.wdb i.upb{background:var(--bt)}.wdb i.dnb{background:var(--acc)}
+.wth.mth,.wtr.mth{grid-template-columns:1fr 1.2fr 1.3fr .8fr}
+</style></head><body><div id="app"></div><script id="state" type="application/json">{"cycle":1,"days":[{"id":"chest-back","name":"Chest & Back","color":"cb","exercises":[{"id":"e3","name":"Chest Press Machine"},{"id":"e2","name":"Upper Back Machine"},{"id":"e1","name":"Inclined Dumbbell Press"},{"id":"e4","name":"Cable Rows"},{"id":"e5","name":"Lat Pulldown"}]},{"id":"bi-tri","name":"Bi & Tri","color":"bt","exercises":[{"id":"e10","name":"JM Press"},{"id":"e17","name":"Incline Dumbbell Curl"},{"id":"e8","name":"SA Tricep Extension (Figure-8) ×2 → V-Bar Pushdown"},{"id":"e9","name":"Zigzag Bar Curl"},{"id":"e18","name":"Hammer Preacher Curl"},{"id":"e12","name":"Forearm Kitty Curl"}]},{"id":"shoulders","name":"Shoulders & Core","color":"sh","exercises":[{"id":"e14","name":"Shoulder Press Machine"},{"id":"e13","name":"Lateral Raises — Cables"},{"id":"e15","name":"Reverse Fly"},{"id":"e16","name":"Ab Machine"}]}],"log":{},"nextId":20,"bw":[],"archived":[]}</script><script>
 (function(){
 var EMBED=JSON.parse(document.getElementById('state').textContent);
 var S, dirty=false, art=null, artTried=true, LSK='wct-data-v1';
@@ -635,7 +655,36 @@ function bwAnalysisHTML(L){if(L.length<3)return '';var A=bwAnalysis(L),h='';
  else h+=barChart(W.filter(function(w){return w.dpct!=null}).map(function(w){return{l:'W'+w.k,y:w.dpct,part:w.partial}}))+'<div class="hint">Green = weight down vs the week before, orange = up, grey = current week so far.</div>';
  h+='<div class="wtab"><div class="wth"><span>Week</span><span>Avg</span><span>Change</span><span>%</span><span>Range</span></div>';
  W.slice().reverse().forEach(function(w){h+='<div class="wtr'+(w.partial?' part':'')+'"><span><b>W'+w.k+'</b><small>'+(w.partial?'so far · '+w.cnt+'/7 days':'D'+w.from+'–'+w.to)+'</small></span><span>'+r1(w.avg)+'</span><span class="'+(w.dkg>0?'upc':w.dkg<0?'dnc':'')+'">'+sgn(w.dkg)+'</span><span class="'+(w.dpct>0?'upc':w.dpct<0?'dnc':'')+'">'+sgn(w.dpct,'%')+'</span><span><small>'+w.min+'–'+w.max+'</small></span></div>'});
- return h+'</div></div>'}
+ return h+'</div></div>'+bwMoreHTML(L,A)}
+
+function bwMoreHTML(L,A){if(L.length<7)return '';var h='',ma=ma7(L),last=A.last;
+ // insights
+ var diffs=[];for(var i=1;i<L.length;i++)if(L[i].n-L[i-1].n===1)diffs.push({n:L[i].n,d:r1(L[i].w-L[i-1].w)});
+ var up=diffs.filter(function(x){return x.d>0}).length,dn=diffs.filter(function(x){return x.d<0}).length,fl=diffs.length-up-dn;
+ var drop=diffs.length?diffs.reduce(function(a,x){return x.d<a.d?x:a}):null,jump=diffs.length?diffs.reduce(function(a,x){return x.d>a.d?x:a}):null;
+ var minMA=Infinity,minN=null;ma.forEach(function(v,i){if(v<minMA-1e-9){minMA=v;minN=L[i].n}});var stall=last.n-minN;
+ var status=stall>=10?{c:'upc',t:'Possible plateau',d:'Your 7-day average hasn\'t hit a new low for '+stall+' days.'}:stall>=5?{c:'',t:'Slowing down',d:'No new 7-day low for '+stall+' days — keep going.'}:{c:'dnc',t:'Steady loss',d:'Your 7-day average hit a new low '+(stall===0?'today':stall+' day'+(stall===1?'':'s')+' ago')+'.'};
+ h+='<div class="sect"><span>Insights</span></div><div class="hcard"><div class="insight '+status.c+'"><b>'+status.t+'</b><span>'+status.d+'</span></div>';
+ h+='<div class="udbar"><i class="dn" style="flex:'+dn+'"></i><i class="fl" style="flex:'+fl+'"></i><i class="up" style="flex:'+up+'"></i></div><div class="udleg"><span class="dnc">'+dn+' down days</span><span>'+fl+' same</span><span class="upc">'+up+' up days</span></div>';
+ h+='<div class="stats"><div><div class="lbl">Biggest drop</div><b class="dnc">'+(drop?drop.d:'—')+'<small> kg</small></b><span>'+(drop?'Day '+drop.n:'')+'</span></div><div><div class="lbl">Biggest jump</div><b class="upc">'+(jump?sgn(jump.d):'—')+'<small> kg</small></b><span>'+(jump?'Day '+jump.n+' · often water':'')+'</span></div><div><div class="lbl">Avg day</div><b>'+(diffs.length?sgn(Math.round(diffs.reduce(function(a,x){return a+x.d},0)/diffs.length*100)/100):'—')+'<small> kg</small></b><span>per day</span></div></div></div>';
+ // projection
+ var r=A.rate4;if(r!=null){h+='<div class="sect"><span>Projection</span><span>at '+sgn(r)+' kg/wk</span></div><div class="hcard"><div class="stats">';[4,8,12].forEach(function(wk){var pw=r1(last.w+r*wk);h+='<div><div class="lbl">In '+wk+' weeks</div><b>'+pw+'<small> kg</small></b><span>Day '+(last.n+wk*7)+' · '+fmtN(last.n+wk*7)+'</span></div>'});h+='</div><div class="hint" style="margin-top:8px">Straight-line estimate from your last 4 weeks — real loss usually slows a little over time.</div></div>'}
+ // milestones
+ var start=L[0].w,ms=[],step=5,top=Math.floor(start/step)*step;if(top===start)top-=step;
+ for(var t=top;t>0;t-=step){var hit=L.filter(function(x){return x.w<t})[0];ms.push({t:t,hit:hit});if(!hit)break}
+ h+='<div class="sect"><span>Milestones</span></div><div class="hcard" style="padding:6px 16px">';ms.forEach(function(m){h+='<div class="msr'+(m.hit?' ok':'')+'"><span class="msi">'+(m.hit?'✓':'')+'</span><b>Below '+m.t+' kg</b><span>'+(m.hit?'Day '+m.hit.n+' · '+fmtN(m.hit.n):(r&&r<0?'~'+Math.max(1,Math.ceil((last.w-m.t)/(-r)))+' wk away · '+r1(last.w-m.t)+' kg to go':r1(last.w-m.t)+' kg to go'))+'</span></div>'});h+='</div>';
+ // weekday pattern (deviation from 7-day avg)
+ var DN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],dev={};L.forEach(function(x){var win=L.filter(function(z){return Math.abs(z.n-x.n)<=3});if(win.length<5)return;var d=dateOfN(x.n).getDay();(dev[d]=dev[d]||[]).push(x.w-mean(win.map(function(z){return z.w})))});var allDev=[];for(var dk in dev)allDev=allDev.concat(dev[dk]);var mDev=mean(allDev)||0;for(var dk2 in dev)dev[dk2]=dev[dk2].map(function(v){return v-mDev});
+ var order=[6,0,1,2,3,4,5],vals=order.map(function(d){return dev[d]?mean(dev[d]):null}),mxv=Math.max.apply(0,vals.filter(function(v){return v!=null}).map(Math.abs).concat([0.1]));
+ var hiD=null,loD=null;order.forEach(function(d,i){var v=vals[i];if(v==null)return;if(hiD==null||v>vals[order.indexOf(hiD)])hiD=d;if(loD==null||v<vals[order.indexOf(loD)])loD=d});
+ h+='<div class="sect"><span>Weekday pattern</span></div><div class="hcard"><div class="wdp">';order.forEach(function(d,i){var v=vals[i];h+='<div class="wdc"><div class="wdb"><i class="'+(v>0?'upb':'dnb')+'" style="height:'+(v==null?0:Math.round(Math.abs(v)/mxv*100))+'%;'+(v>0?'bottom:50%':'top:50%')+'"></i></div><span>'+DN[d]+'</span><small>'+(v==null?'—':sgn(Math.round(v*100)/100))+'</small></div>'});
+ h+='</div><div class="hint" style="margin-top:8px">Compared with the average of the 3 days either side. You tend to weigh most on <b style="color:var(--bt)">'+DN[hiD]+'</b> and least on <b style="color:var(--acc)">'+DN[loD]+'</b>.</div></div>';
+ // monthly
+ var M={};L.forEach(function(x){var d=dateOfN(x.n),k=d.getFullYear()*12+d.getMonth();(M[k]=M[k]||[]).push(x)});var mk=Object.keys(M).map(Number).sort(function(a,b){return a-b}),pm=null;
+ h+='<div class="sect"><span>Monthly</span></div><div class="hcard"><div class="wtab" style="margin-top:0"><div class="wth mth"><span>Month</span><span>Avg</span><span>Start→End</span><span>Change</span></div>';
+ var rows=[];mk.forEach(function(k){var a=M[k],av=mean(a.map(function(x){return x.w})),nm=dateOfN(a[0].n).toLocaleDateString('en-GB',{month:'short',year:'2-digit'}),ch=r1(a[a.length-1].w-a[0].w);rows.push('<div class="wtr mth"><span><b>'+nm+'</b><small>'+a.length+' day'+(a.length===1?'':'s')+'</small></span><span>'+r1(av)+(pm!=null?'<small> '+sgn(r1(av-pm))+'</small>':'')+'</span><span><small>'+a[0].w+' → '+a[a.length-1].w+'</small></span><span class="'+(ch>0?'upc':ch<0?'dnc':'')+'">'+sgn(ch)+'</span></div>');pm=av});
+ h+=rows.reverse().join('')+'</div></div>';
+ return h}
 function weightView(){
  var L=bwSorted();
  var h='<div class="top"><button class="iconbtn" data-go="">'+ICON.back+'</button><div class="brand">Body weight</div><div style="width:40px"></div></div><h2 style="font-size:34px;font-weight:800">Body weight</h2>';
@@ -743,6 +792,6 @@ document.addEventListener('click',function(ev){
 render();
 })();
 </script><script>
-var APP_VER="15";
+var APP_VER="16";
 (function(){try{if(!navigator.onLine)return;fetch('./index.html?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){var m=t.match(/APP_VER="(\d+)"/);if(m&&m[1]!==APP_VER){var k='wct-upd-'+m[1];if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');location.replace('./?v='+m[1])}}).catch(function(){})}catch(e){}})();
 </script></body></html>
