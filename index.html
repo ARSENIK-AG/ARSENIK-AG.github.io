@@ -312,6 +312,18 @@ textarea.txin{resize:none;font-family:inherit;line-height:1.4}
 .wdb i{position:absolute;left:22%;right:22%;max-height:50%;border-radius:4px}
 .wdb i.upb{background:var(--bt)}.wdb i.dnb{background:var(--acc)}
 .wth.mth,.wtr.mth{grid-template-columns:1fr 1.2fr 1.3fr .8fr}
+
+.sq.exc{background:repeating-linear-gradient(45deg,#ff6b6b 0 3px,#3a2224 3px 6px)}
+.exban{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;border-left:3px solid var(--xc);background:color-mix(in srgb,var(--xc) 12%,var(--card));border-radius:12px;padding:12px 14px;margin:12px 0 4px}
+.exban b{color:var(--xc);font-size:15px}.exban span{font-size:13.5px}.exban em{font-style:normal;font-size:11.5px;color:var(--mut)}
+.big.exbtn{color:#ff8a8a;border-color:rgba(255,107,107,.35)}
+.excnt{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px}
+.excnt span{font-size:12.5px;font-weight:600;padding:6px 10px;border-radius:99px;background:color-mix(in srgb,var(--xc) 15%,transparent);color:var(--xc)}
+.exrow{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;width:100%;text-align:left;padding:11px 0;border-top:1px solid var(--line)}
+.exrow .exi{font-size:20px}.exrow b{font-size:14px;display:block}.exrow span{font-size:12.5px;color:var(--mut)}
+.exrow em{font-style:normal;font-size:12px;color:var(--dim)}
+.cal .cd.ex{background:repeating-linear-gradient(45deg,#3a2224 0 4px,#2a1c1e 4px 8px);color:#ff8a8a}
+.cal .cd u{text-decoration:none;position:absolute;top:-5px;right:-4px;font-size:11px}
 </style></head><body><div id="app"></div><script id="state" type="application/json">{"cycle":1,"days":[{"id":"chest-back","name":"Chest & Back","color":"cb","exercises":[{"id":"e3","name":"Chest Press Machine"},{"id":"e2","name":"Upper Back Machine"},{"id":"e1","name":"Inclined Dumbbell Press"},{"id":"e4","name":"Cable Rows"},{"id":"e5","name":"Lat Pulldown"}]},{"id":"bi-tri","name":"Bi & Tri","color":"bt","exercises":[{"id":"e10","name":"JM Press"},{"id":"e17","name":"Incline Dumbbell Curl"},{"id":"e8","name":"SA Tricep Extension (Figure-8) ×2 → V-Bar Pushdown"},{"id":"e9","name":"Zigzag Bar Curl"},{"id":"e18","name":"Hammer Preacher Curl"},{"id":"e12","name":"Forearm Kitty Curl"}]},{"id":"shoulders","name":"Shoulders & Core","color":"sh","exercises":[{"id":"e14","name":"Shoulder Press Machine"},{"id":"e13","name":"Lateral Raises — Cables"},{"id":"e15","name":"Reverse Fly"},{"id":"e16","name":"Ab Machine"}]}],"log":{},"nextId":20,"bw":[],"archived":[]}</script><script>
 (function(){
 var EMBED=JSON.parse(document.getElementById('state').textContent);
@@ -333,7 +345,9 @@ function blankSets(c,dayId,exId){var p=prevEntry(c,dayId,exId),n=p?Math.max(1,p.
 function hasData(e){if(!e)return false;if(e.note||e.form)return true;return e.sets.some(function(s){return s[0]!==''||s[1]!==''})}
 function exHasAny(dayId,exId){for(var c in S.log){if(hasData(entry(c,dayId,exId)))return true}return false}
 function WD(){return S.days.filter(function(d){return !d.rest})}
-function dayStatus(c,dayId){var d=day(dayId);if(d&&d.rest){var D=entry(c,dayId);if(D&&D.done)return 'done';var idx=S.days.indexOf(d),later=false;for(var k=idx+1;k<S.days.length;k++){var o=S.days[k];if(!o.rest&&wStatus(c,o.id)!=='todo')later=true}if(later)return 'done';if(c<S.cycle&&WD().every(function(w){return wStatus(c,w.id)==='done'}))return 'done';return 'todo'}return wStatus(c,dayId)}
+function dayStatus(c,dayId){var d=day(dayId);if(d&&d.rest){var D=entry(c,dayId);if(D&&D.done)return 'done';var idx=S.days.indexOf(d),later=false;for(var k=idx+1;k<S.days.length;k++){var o=S.days[k];if(!o.rest&&wStatus(c,o.id)!=='todo')later=true}if(later)return 'done';if(c<S.cycle&&WD().every(function(w){return wStatus(c,w.id)==='done'}))return 'done';return 'todo'}var ws=wStatus(c,dayId);if(ws==='todo'){var DX=entry(c,dayId);if(DX&&DX.excuse)return 'exc'}return ws}
+var EX={injury:{ic:'🤕',l:'Injured',c:'#ff6b6b'},sick:{ic:'🤒',l:'Sick',c:'#ffb84d'},other:{ic:'⏸',l:'Paused',c:'#b38cff'}};
+function okSt(st){return st==='done'||st==='exc'}
 function wStatus(c,dayId){var D=entry(c,dayId);if(!D)return 'todo';if(D.done)return 'done';for(var k in D.ex)if(hasData(D.ex[k]))return 'prog';return 'todo'}
 function prevEntry(c,dayId,exId){for(var k=c-1;k>=1;k--){var e=entry(k,dayId,exId);if(hasData(e))return{c:k,e:e}}return null}
 function fmtSet(s){if(s[0]===''&&s[1]==='')return '';return (s[0]===''?'–':s[0])+(s[1]!==''?' × '+s[1]:'')}
@@ -411,15 +425,15 @@ function bwCard(){
 
 function home(){
  var c=viewCycle||S.cycle, done=0, NW=WD().length;
- WD().forEach(function(d){if(dayStatus(c,d.id)==='done')done++});
+ var exN=0;WD().forEach(function(d){var q=dayStatus(c,d.id);if(q==='done')done++;if(q==='exc')exN++});
  if(fresh)return '<div class="onb"><div class="logo">'+LOGO+'</div><h1>Gym Tracker</h1><p>Import the data file you got from Claude to bring in your cycles 1–12 and your weight history, or start empty.</p><label class="big" style="display:block;text-align:center">Import data file<input type="file" accept=".json,application/json" id="impfile" hidden></label><button class="big ghost" id="startfresh">Start empty</button></div>';
  var h='<div class="top"><div class="brand">Cycle Tracker</div><div style="display:flex;gap:8px"><button class="iconbtn" data-go="cardio" aria-label="Cardio">'+ICON.run+'</button><button class="iconbtn" data-go="weight" aria-label="Body weight">'+ICON.scale+'</button><button class="iconbtn" data-go="history" aria-label="Progress">'+ICON.chart+'</button><button class="iconbtn" data-go="settings" aria-label="Settings">'+ICON.gear+'</button></div></div>';
- h+='<div class="hero"><div style="flex:1;position:relative;z-index:1;min-width:0"><div class="lbl">'+(c===S.cycle?'Current cycle':'Past cycle')+'</div><h1>Cycle '+c+'</h1><div class="sub">'+(done===NW?'All days done 💪':(NW-done)+' workout'+(NW-done===1?'':'s')+' left')+'</div>';
+ h+='<div class="hero"><div style="flex:1;position:relative;z-index:1;min-width:0"><div class="lbl">'+(c===S.cycle?'Current cycle':'Past cycle')+'</div><h1>Cycle '+c+'</h1><div class="sub">'+(done+exN===NW?(exN?'Cycle covered · '+exN+' excused':'All days done 💪'):(NW-done-exN)+' workout'+(NW-done-exN===1?'':'s')+' left'+(exN?' · '+exN+' excused':''))+'</div>';
  if(S.cycle>1){h+='<div class="cyclenav" id="cnav">';for(var k=1;k<=S.cycle;k++)h+='<button class="pill'+(k===c?' on':'')+'" data-cyc="'+k+'">C'+k+'</button>';h+='</div>'}
  h+='</div>'+ring(done,NW)+'</div>';
  h+='<div class="sect"><span>Workouts</span></div>';
- var nxt=null;S.days.forEach(function(d){if(!nxt&&dayStatus(c,d.id)!=='done')nxt=d.id});
- S.days.forEach(function(d){if(d.rest){var rs=dayStatus(c,d.id),isR=c===S.cycle&&d.id===nxt;h+='<button class="day rest'+(isR?' isnext':'')+'" data-restday="'+c+'|'+d.id+'"><div class="bar" style="background:#3a3f4a"></div><div style="min-width:0"><h3>'+esc(d.name)+'</h3><div class="meta">Recover · tap to mark</div></div><div class="st '+(rs==='done'?'done':isR?'next':'')+'">'+(rs==='done'?'Rested ✓':isR?'Up next':'Rest')+'</div></button>';return}var st=dayStatus(c,d.id),D=entry(c,d.id);var isN=c===S.cycle&&d.id===nxt;var lab={done:'Done ✓',prog:'In progress',todo:isN?'Up next':'Start'}[st];if(isN&&st==='todo')st='next';h+='<button class="day'+(isN?' isnext':'')+'" data-go="c'+c+'-'+d.id+'"><div class="bar" style="background:var(--'+d.color+')"></div><div style="min-width:0"><h3>'+esc(d.name)+'</h3><div class="meta">'+d.exercises.length+' exercise'+(d.exercises.length===1?'':'s')+(D&&D.date?' · '+esc(D.date):'')+'</div></div><div class="st '+st+'">'+lab+'</div></button>'});
+ var nxt=null;S.days.forEach(function(d){if(!nxt&&!okSt(dayStatus(c,d.id)))nxt=d.id});
+ S.days.forEach(function(d){if(d.rest){var rs=dayStatus(c,d.id),isR=c===S.cycle&&d.id===nxt;h+='<button class="day rest'+(isR?' isnext':'')+'" data-restday="'+c+'|'+d.id+'"><div class="bar" style="background:#3a3f4a"></div><div style="min-width:0"><h3>'+esc(d.name)+'</h3><div class="meta">Recover · tap to mark</div></div><div class="st '+(rs==='done'?'done':isR?'next':'')+'">'+(rs==='done'?'Rested ✓':isR?'Up next':'Rest')+'</div></button>';return}var st=dayStatus(c,d.id),D=entry(c,d.id);var isN=c===S.cycle&&d.id===nxt;var lab={done:'Done ✓',prog:'In progress',todo:isN?'Up next':'Start',exc:D&&D.excuse?(EX[D.excuse.t]||EX.other).ic+' '+(EX[D.excuse.t]||EX.other).l:''}[st];if(isN&&st==='todo')st='next';h+='<button class="day'+(isN?' isnext':'')+'" data-go="c'+c+'-'+d.id+'"><div class="bar" style="background:var(--'+d.color+')"></div><div style="min-width:0"><h3>'+esc(d.name)+'</h3><div class="meta">'+d.exercises.length+' exercise'+(d.exercises.length===1?'':'s')+(D&&D.date?' · '+esc(D.date):'')+'</div></div><div class="st '+st+'">'+lab+'</div></button>'});
  h+='<div class="addrow"><button class="addday" id="addday">+ Workout day</button><button class="addday" id="addrest">+ Rest day</button></div>';
  if(c===S.cycle)h+='<button class="big'+(done===NW?'':' ghost')+'" id="newcyc" style="margin-top:8px">Start Cycle '+(S.cycle+1)+' →</button>';
  else h+='<button class="big ghost" data-cyc="'+S.cycle+'" style="margin-top:8px">Back to current cycle</button>';
@@ -453,8 +467,10 @@ function dayView(c,dayId){
   h+='</div><div style="display:flex;gap:14px">'+(e.sets.length<6?'<button class="addset" data-addset="'+x.id+'">+ Add set</button>':'')+(e.sets.length>1?'<button class="addset" data-rmset="'+x.id+'">− Remove set</button>':'')+'<button class="addset fbtn" data-form="'+x.id+'">⚑ '+(e.form?'Edit form change':'Form change')+'</button></div><input class="note" data-note="'+x.id+'" value="'+esc(e.note)+'" placeholder="Notes (seat, grip, spot…)"></div>';
  });
  var st=dayStatus(c,dayId);
+ if(D&&D.excuse){var xk=EX[D.excuse.t]||EX.other;h=h.replace('<div class="restrow">','<button class="exban" data-excuse="'+dayId+'" style="--xc:'+xk.c+'"><b>'+xk.ic+' '+xk.l+' — session excused</b><span>'+(D.excuse.note?esc(D.excuse.note):'No note')+'</span><em>Tap to edit or remove</em></button><div class="restrow">')}
  h+='<button class="big" id="finish" style="margin-top:20px">'+(st==='done'?'Save changes':'Finish workout ✓')+'</button>';
  if(st==='done')h+='<button class="big ghost" id="undone">Mark as not done</button>';
+ if(st!=='done'&&st!=='prog')h+='<button class="big ghost exbtn" data-excuse="'+dayId+'">'+(D&&D.excuse?'Edit injury / sick note':'🤕 Can\'t train — injured or sick')+'</button>';
  return h;
 }
 function exEditRows(d){var h='';d.exercises.forEach(function(x,i){h+='<div class="edrow"><input data-ren="'+d.id+'|'+x.id+'" value="'+esc(x.name)+'"><button class="sm" data-mv="'+d.id+'|'+i+'|-1">'+ICON.up+'</button><button class="sm" data-mv="'+d.id+'|'+i+'|1">'+ICON.down+'</button><button class="sm del" data-del="'+d.id+'|'+x.id+'">'+ICON.x+'</button></div>'});return h}
@@ -542,24 +558,24 @@ function dayKind(n,G,C){return G[n]?'gym':C[n]?'cardio':''}
 function weekStartN(n){var dow=(dateOfN(n).getDay()+1)%7;return n-dow}
 function cycDays(c){return S.days.map(function(d){return{d:d,st:dayStatus(c,d.id),D:entry(c,d.id)}})}
 function cycSpan(c){var ns=[];WD().forEach(function(d){var D=entry(c,d.id);if(D&&D.n)ns.push(D.n)});if(!ns.length)return '';var a=Math.min.apply(0,ns),b=Math.max.apply(0,ns);return a===b?fmtN(a):fmtN(a).split(' ')[0]+(dateOfN(a).getMonth()===dateOfN(b).getMonth()?'':' '+fmtN(a).split(' ')[1])+'–'+fmtN(b)}
-function cycDone(c){return WD().every(function(d){return dayStatus(c,d.id)==='done'})}
+function cycDone(c){return WD().every(function(d){return okSt(dayStatus(c,d.id))})}
 function discStats(){var done=0;for(var c=1;c<=S.cycle;c++)if(cycDone(c))done++;
  var streak=0,k=cycDone(S.cycle)?S.cycle:S.cycle-1;while(k>=1&&cycDone(k)){streak++;k--}
- var tot=0,got=0;for(c=1;c<=S.cycle;c++)WD().forEach(function(d){if(c<S.cycle||dayStatus(c,d.id)!=='todo'){tot++;if(dayStatus(c,d.id)==='done')got++}});
+ var tot=0,got=0;for(c=1;c<=S.cycle;c++)WD().forEach(function(d){var q=dayStatus(c,d.id);if(q==='exc')return;if(c<S.cycle||q!=='todo'){tot++;if(dayStatus(c,d.id)==='done')got++}});
  var cur=WD().filter(function(d){return dayStatus(S.cycle,d.id)==='done'}).length;
  return{done:done,streak:streak,pct:tot?Math.round(got/tot*100):0,cur:cur}}
-function nextUp(){for(var i=0;i<S.days.length;i++)if(dayStatus(S.cycle,S.days[i].id)!=='done')return S.days[i].id;return null}
+function nextUp(){for(var i=0;i<S.days.length;i++)if(!okSt(dayStatus(S.cycle,S.days[i].id)))return S.days[i].id;return null}
 var discAll=false;
 function cgrid(n,big){var from=Math.max(1,S.cycle-n+1),nx=nextUp(),h='<div class="cg'+(big?' cgbig':'')+(big&&discAll?' cgall':'')+'">';
  
  h+='<div class="cgc">';
  for(var c=from;c<=S.cycle;c++){h+='<div class="cgcol">'+(big?'<span class="cgn'+(c===S.cycle?' cur':'')+'">'+((c===1||c%5===0||c===S.cycle)?c:'')+'</span>':'');
-  S.days.forEach(function(d){var st=dayStatus(c,d.id);if(d.rest){h+='<i class="sq restsq'+(st==='done'?' r':'')+(c===S.cycle&&d.id===nx?' today':'')+'"></i>';return}var cls='sq '+(st==='done'?'on':st==='prog'?'half':'off')+(c===S.cycle&&d.id===nx?' today':'');var sty=st!=='todo'?' style="--c:var(--'+d.color+')"':'';h+=big?'<button class="'+cls+'"'+sty+' data-go="c'+c+'-'+d.id+'" aria-label="Cycle '+c+' '+esc(d.name)+'"></button>':'<i class="'+cls+'"'+sty+'></i>'});
+  S.days.forEach(function(d){var st=dayStatus(c,d.id);if(d.rest){h+='<i class="sq restsq'+(st==='done'?' r':'')+(c===S.cycle&&d.id===nx?' today':'')+'"></i>';return}var cls='sq '+(st==='done'?'on':st==='prog'?'half':st==='exc'?'exc':'off')+(c===S.cycle&&d.id===nx?' today':'');var sty=(st==='done'||st==='prog')?' style="--c:var(--'+d.color+')"':'';h+=big?'<button class="'+cls+'"'+sty+' data-go="c'+c+'-'+d.id+'" aria-label="Cycle '+c+' '+esc(d.name)+'"></button>':'<i class="'+cls+'"'+sty+'></i>'});
   if(!S.days.some(function(d){return d.rest}))h+='<i class="sq rest'+(cycDone(c)?' r':'')+'"></i>';h+='</div>'}
  return h+'</div></div>'}
 
 var calOff=0;
-function allWorkouts(){var L=[];for(var c=1;c<=S.cycle;c++)S.days.forEach(function(d){var D=entry(c,d.id);if(!D)return;var st=dayStatus(c,d.id);if(d.rest){if(D.done&&D.n)L.push({c:c,d:d,n:D.n,rest:true});return}if(st!=='todo')L.push({c:c,d:d,n:D.n||null})});return L}
+function allWorkouts(){var L=[];for(var c=1;c<=S.cycle;c++)S.days.forEach(function(d){var D=entry(c,d.id);if(!D)return;var st=dayStatus(c,d.id);if(d.rest){if(D.done&&D.n)L.push({c:c,d:d,n:D.n,rest:true});return}if(st!=='todo'&&st!=='exc')L.push({c:c,d:d,n:D.n||null})});return L}
 function trackStats(){var W=allWorkouts().filter(function(w){return !w.rest}),ns=W.map(function(w){return w.n}).filter(Boolean);var last=ns.length?Math.max.apply(0,ns):null;
  var starts=[];for(var c=1;c<=S.cycle;c++){var cs=[];WD().forEach(function(d){var D=entry(c,d.id);if(D&&D.n)cs.push(D.n)});if(cs.length)starts.push(Math.min.apply(0,cs))}
  var gaps=[];for(var i=1;i<starts.length;i++)gaps.push(starts[i]-starts[i-1]);var avg=gaps.length?r1(gaps.reduce(function(a,b){return a+b},0)/gaps.length):null;
@@ -579,12 +595,12 @@ function badges(t){var B=[];function add(ic,name,v,goal,unit){B.push({ic:ic,name
  [1,10,30].forEach(function(g){add('🫀',g===1?'First cardio':g+' cardio',t.cardio,g)});
  return B}
 function calMonth(){var t=new Date(),m=new Date(t.getFullYear(),t.getMonth()+calOff,1),y=m.getFullYear(),mo=m.getMonth(),days=new Date(y,mo+1,0).getDate(),lead=(m.getDay()+1)%7;
- var byN={};allWorkouts().forEach(function(w){if(w.n)(byN[w.n]=byN[w.n]||[]).push(w)});var cd=cardioDays(),tn=todayN();
+ var byN={};allWorkouts().forEach(function(w){if(w.n)(byN[w.n]=byN[w.n]||[]).push(w)});var exD={};for(var ec=1;ec<=S.cycle;ec++)WD().forEach(function(d){var D=entry(ec,d.id);if(D&&D.excuse&&D.excuse.n&&dayStatus(ec,d.id)==='exc')exD[D.excuse.n]=D.excuse.t});var cd=cardioDays(),tn=todayN();
  var h='<div class="calhead"><button class="sm" data-cal="-1">'+ICON.back+'</button><b>'+m.toLocaleDateString('en-GB',{month:'long',year:'numeric'})+'</b><button class="sm flip" data-cal="1"'+(calOff>=0?' disabled':'')+'>'+ICON.back+'</button></div><div class="cal"><span>Sa</span><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span>';
  var cnt=0;for(var i=0;i<lead;i++)h+='<i></i>';
  for(var dd=1;dd<=days;dd++){var dt=new Date(y,mo,dd),n=Math.round((dt-d1())/864e5)+1,ws=byN[n]||[],w=ws.filter(function(x){return !x.rest})[0],r=ws.filter(function(x){return x.rest})[0];if(w)cnt++;
-  var sty=w?' style="--c:var(--'+w.d.color+')"':'',cls='cd'+(w?' on':r?' rs':'')+(n===tn?' today':'')+(n>tn?' fut':'');
-  h+='<button class="'+cls+'"'+sty+(w?' data-go="c'+w.c+'-'+w.d.id+'"':'')+'>'+dd+(cd[n]?'<em></em>':'')+'</button>'}
+  var sty=w?' style="--c:var(--'+w.d.color+')"':'',cls='cd'+(w?' on':r?' rs':exD[n]?' ex':'')+(n===tn?' today':'')+(n>tn?' fut':'');
+  h+='<button class="'+cls+'"'+sty+(w?' data-go="c'+w.c+'-'+w.d.id+'"':'')+'>'+dd+(cd[n]?'<em></em>':'')+(!w&&exD[n]?'<u>'+(EX[exD[n]]||EX.other).ic+'</u>':'')+'</button>'}
  return h+'</div><div class="hint" style="margin-top:8px">'+cnt+' workout day'+(cnt===1?'':'s')+' this month · orange dot = cardio</div>'}
 function discExtra(){var t=trackStats(),xp=xpOf(t),L=lvl(xp),h='';
  h+='<div class="hcard lvcard"><div style="display:flex;justify-content:space-between;align-items:flex-end"><div><div class="lbl">Level '+L.l+'</div><div class="lvname">'+LVN[Math.min(L.l-1,LVN.length-1)]+'</div></div><div class="xp">'+xp+' XP</div></div><div class="xpbar"><i style="width:'+Math.round(L.into/L.need*100)+'%"></i></div><div class="hint">'+(L.need-L.into)+' XP to level '+(L.l+1)+' · workouts +10 · full cycle +25 · PR +15 · cardio +5 · each kg lost +10</div></div>';
@@ -596,12 +612,28 @@ function discExtra(){var t=trackStats(),xp=xpOf(t),L=lvl(xp),h='';
  h+='<div class="sect"><span>Achievements</span><span>'+got+'/'+B.length+'</span></div><div class="badges">';
  B.sort(function(a,b){return (b.ok-a.ok)||((b.v/b.goal)-(a.v/a.goal))}).forEach(function(b){h+='<div class="badge'+(b.ok?' ok':'')+'"><div class="bi">'+b.ic+'</div><div class="bn">'+esc(b.name)+'</div>'+(b.ok?'<div class="bs">Unlocked</div>':'<div class="bp"><i style="width:'+Math.round(b.v/b.goal*100)+'%"></i></div><div class="bs">'+b.v+'/'+b.goal+(b.unit?' '+b.unit:'')+'</div>')+'</div>'});
  return h+'</div>'}
+
+function excuseModal(c,ids,cur){var t=(cur&&cur.t)||'injury',note=(cur&&cur.note)||'',m=document.createElement('div');m.className='modal';
+ function draw(){var names=ids.map(function(id){return day(id).name}).join(', ');m.innerHTML='<div class="box"><h3>Can\'t train</h3><p>'+esc(names)+' · Cycle '+c+'. Excused sessions don\'t break your streak and aren\'t counted as missed.</p><div class="fopts">'+['injury','sick','other'].map(function(k){var o=EX[k];return '<button data-et="'+k+'" class="'+(k===t?'on':'')+'" style="--fc:'+o.c+'"><b>'+o.ic+'</b>'+o.l+'</button>'}).join('')+'</div><textarea id="exnote" class="txin" rows="3" placeholder="What happened? e.g. lower back strain, flu, elbow pain on curls…">'+esc(note)+'</textarea><div class="row2" style="margin-top:14px">'+(cur?'<button class="big danger" data-a="del">Remove</button>':'<button class="big ghost" data-a="no">Cancel</button>')+'<button class="big" data-a="ok">Save</button></div></div>'}
+ draw();m.onclick=function(ev){var et=ev.target.closest('[data-et]');if(et){note=m.querySelector('#exnote').value;t=et.dataset.et;draw();return}var b=ev.target.closest('[data-a]'),a=b&&b.dataset.a;if(!a&&ev.target!==m)return;note=(m.querySelector('#exnote')||{}).value||note;m.remove();
+  if(a==='ok'){ids.forEach(function(id){var D=entry(c,id,null,true);D.excuse={t:t,note:note.trim(),n:(D.excuse&&D.excuse.n)||todayN()}});save((EX[t]||EX.other).ic+' Excused');var sy=window.scrollY;render();window.scrollTo(0,sy)}
+  else if(a==='del'){ids.forEach(function(id){var D=entry(c,id);if(D)delete D.excuse});save('Removed');var sy2=window.scrollY;render();window.scrollTo(0,sy2)}};
+ document.body.appendChild(m)}
+function healthHTML(){var L=[];for(var c=S.cycle;c>=1;c--)WD().forEach(function(d){var D=entry(c,d.id);if(D&&D.excuse)L.push({c:c,d:d,x:D.excuse,st:dayStatus(c,d.id)})});
+ var left=WD().filter(function(d){return !okSt(dayStatus(S.cycle,d.id))&&dayStatus(S.cycle,d.id)!=='prog'});
+ var h='<div class="sect"><span>Injury & sick log</span><span>'+L.length+' excused</span></div><div class="hcard">';
+ if(left.length)h+='<button class="big ghost exbtn" id="exrest" style="margin-top:0">🤕 Injured / sick — excuse the rest of Cycle '+S.cycle+' ('+left.length+')</button>';
+ if(L.length){var cnt={};L.forEach(function(e){cnt[e.x.t]=(cnt[e.x.t]||0)+1});h+='<div class="excnt">'+Object.keys(cnt).map(function(k){var o=EX[k]||EX.other;return '<span style="--xc:'+o.c+'">'+o.ic+' '+cnt[k]+' '+o.l.toLowerCase()+'</span>'}).join('')+'</div>';
+  L.forEach(function(e){var o=EX[e.x.t]||EX.other;h+='<button class="exrow" data-exedit="'+e.c+'|'+e.d.id+'" style="--xc:'+o.c+'"><span class="exi">'+o.ic+'</span><div><b>Cycle '+e.c+' · '+esc(e.d.name)+'</b><span>'+(e.x.note?esc(e.x.note):o.l)+'</span></div><em>'+(e.x.n?fmtN(e.x.n):'')+'</em></button>'})}
+ else h+='<div class="hint" style="margin-top:'+(left.length?'10':'0')+'px">No injuries or sick days logged. If you can\'t train, open the workout and tap “Can\'t train”, or use the button above. Excused sessions keep your streak safe.</div>';
+ return h+'</div>'}
 function discCard(){var st=discStats(),T=WD().length;return '<button class="bwcard disc" data-go="discipline"><div style="text-align:left"><div class="lbl">Discipline <span class="lvchip">Lv '+lvl(xpOf(trackStats())).l+'</span></div><div class="bwv" style="color:var(--acc)">'+st.cur+'<small>/'+T+' this cycle</small></div><div class="bwd">'+(st.streak?'🔥 '+st.streak+' full cycle'+(st.streak===1?'':'s')+' in a row':'Finish all '+T+' days to start a streak')+'</div></div>'+cgrid(30,false)+'</button>'}
 function discView(){var st=discStats(),T=WD().length;
  var h='<div class="top"><button class="iconbtn" data-go="">'+ICON.back+'</button><div class="brand">Discipline</div><div style="width:40px"></div></div><h2 style="font-size:34px;font-weight:800">Discipline</h2>';
  h+='<div class="hcard"><div class="stats"><div><div class="lbl">This cycle</div><b>'+st.cur+'<small>/'+T+'</small></b><span>Cycle '+S.cycle+'</span></div><div><div class="lbl">Streak</div><b>'+st.streak+'</b><span>full cycles</span></div><div><div class="lbl">Completed</div><b>'+st.done+'</b><span>'+st.pct+'% of days</span></div></div>';
- h+='<div class="cghead"><span class="lbl">'+(discAll||S.cycle<=18?'All '+S.cycle+' cycles':'Latest cycles')+'</span>'+(S.cycle>18||discAll?'<button class="pill" id="discall">'+(discAll?'Show less':'Expand ⤢')+'</button>':'')+'</div><div class="cgwrap">'+cgrid(discAll?S.cycle:30,true)+'</div><div class="legend">'+WD().map(function(d){return '<span><i class="sq on" style="--c:var(--'+d.color+')"></i>'+esc(d.name)+'</span>'}).join('')+'<span><i class="sq off"></i>Missed</span><span><i class="sq rbar"></i>Rest</span></div><div class="hint" style="margin-top:8px">Each column is one cycle, in your order, then rest. Tap a square to open that workout.</div></div>';
- var rows='';for(var c=S.cycle;c>=1;c--){var cnt=0,dots='';S.days.forEach(function(d){var s2=dayStatus(c,d.id);if(d.rest){dots+='<i class="sq sm restdot'+(s2==='done'?' r':'')+'"></i>';return}if(s2==='done')cnt++;dots+='<i class="sq sm '+(s2==='done'?'on':s2==='prog'?'half':'off')+'" style="--c:var(--'+d.color+')"></i>'});if(!S.days.some(function(d){return d.rest}))dots+='<i class="sq sm rest'+(cnt===T?' r':'')+'"></i>';var sp=cycSpan(c);rows+='<button class="wkrow" data-cyc="'+c+'" data-go=""><span><b style="color:var(--txt);font-weight:600">Cycle '+c+'</b>'+(sp?' · '+sp:'')+'</span><div class="dots">'+dots+'</div><b class="'+(cnt===T?'dnc':c<S.cycle?'upc':'')+'">'+cnt+'/'+T+'</b></button>'}
+ h+='<div class="cghead"><span class="lbl">'+(discAll||S.cycle<=18?'All '+S.cycle+' cycles':'Latest cycles')+'</span>'+(S.cycle>18||discAll?'<button class="pill" id="discall">'+(discAll?'Show less':'Expand ⤢')+'</button>':'')+'</div><div class="cgwrap">'+cgrid(discAll?S.cycle:30,true)+'</div><div class="legend">'+WD().map(function(d){return '<span><i class="sq on" style="--c:var(--'+d.color+')"></i>'+esc(d.name)+'</span>'}).join('')+'<span><i class="sq exc"></i>Injured / sick</span><span><i class="sq off"></i>Missed</span><span><i class="sq rbar"></i>Rest</span></div><div class="hint" style="margin-top:8px">Each column is one cycle, in your order, then rest. Tap a square to open that workout.</div></div>';
+ var rows='';for(var c=S.cycle;c>=1;c--){var cnt=0,xc=0,dots='';S.days.forEach(function(d){var s2=dayStatus(c,d.id);if(d.rest){dots+='<i class="sq sm restdot'+(s2==='done'?' r':'')+'"></i>';return}if(s2==='done')cnt++;if(s2==='exc')xc++;dots+='<i class="sq sm '+(s2==='done'?'on':s2==='prog'?'half':s2==='exc'?'exc':'off')+'" style="--c:var(--'+d.color+')"></i>'});if(!S.days.some(function(d){return d.rest}))dots+='<i class="sq sm rest'+(cnt+xc===T?' r':'')+'"></i>';var sp=cycSpan(c);rows+='<button class="wkrow" data-cyc="'+c+'" data-go=""><span><b style="color:var(--txt);font-weight:600">Cycle '+c+'</b>'+(sp?' · '+sp:'')+'</span><div class="dots">'+dots+'</div><b class="'+(cnt+xc===T?'dnc':c<S.cycle?'upc':'')+'">'+cnt+'/'+T+(xc?' <small>+'+xc+'🤕</small>':'')+'</b></button>'}
+ h+=healthHTML();
  h+=discExtra();
  h+='<div class="sect"><span>By cycle</span><span>'+S.cycle+' cycles</span></div><div class="hcard" style="padding:6px 16px">'+rows+'</div>';
  return h}
@@ -751,6 +783,9 @@ document.addEventListener('click',function(ev){
  if(t.id==='caddtype'){textModal('New cardio type','e.g. Swimming',function(v){if(S.cardioTypes.indexOf(v)<0)S.cardioTypes.push(v);cdType=v;save();keepForm()});return}
  if(t.id==='cdsave'){cdSave();return}
  if(t.id==='addday'){addDay();return}
+ if(t.dataset.excuse&&m){var Dq=entry(+m[1],t.dataset.excuse);excuseModal(+m[1],[t.dataset.excuse],Dq&&Dq.excuse);return}
+ if(t.dataset.exedit){var xp=t.dataset.exedit.split('|'),Dz=entry(+xp[0],xp[1]);excuseModal(+xp[0],[xp[1]],Dz&&Dz.excuse);return}
+ if(t.id==='exrest'){var ids=WD().filter(function(d){var q=dayStatus(S.cycle,d.id);return !okSt(q)&&q!=='prog'}).map(function(d){return d.id});if(ids.length)excuseModal(S.cycle,ids,null);return}
  if(t.dataset.cal){calOff=Math.min(0,calOff+(+t.dataset.cal));var sy5=window.scrollY;render();window.scrollTo(0,sy5);return}
  if(t.id==='addrest'){addRest();return}
  if(t.dataset.restday){var rp=t.dataset.restday.split('|'),rc=+rp[0],RD=entry(rc,rp[1],null,true);if(dayStatus(rc,rp[1])==='done'&&!RD.done){toast('Counted as rested ✓');return}RD.done=!RD.done;if(RD.done&&!RD.n&&rc===S.cycle)RD.n=todayN();save(RD.done?'Rest day ✓':'Unmarked');var sy4=window.scrollY;render();window.scrollTo(0,sy4);return}
@@ -765,7 +800,7 @@ document.addEventListener('click',function(ev){
  if(t.id==='dlbk'){downloadBackup();return}
  if(t.id==='startfresh'){save();render();return}
  if(t.id==='editday'||t.id==='editdone'){editMode=!editMode;render();window.scrollTo(0,0);return}
- if(t.id==='newcyc'){var c=S.cycle,left=WD().filter(function(d){return dayStatus(c,d.id)!=='done'}).length;var doit=function(){S.cycle++;viewCycle=null;markDirty();render();save('Cycle '+S.cycle+' started')};if(left)modal('Start Cycle '+(c+1)+'?',left+' workout'+(left>1?'s':'')+' in Cycle '+c+' not finished yet. You can still go back and fill them in later.','Start',doit);else doit();return}
+ if(t.id==='newcyc'){var c=S.cycle,left=WD().filter(function(d){return !okSt(dayStatus(c,d.id))}).length;var doit=function(){S.cycle++;viewCycle=null;markDirty();render();save('Cycle '+S.cycle+' started')};if(left)modal('Start Cycle '+(c+1)+'?',left+' workout'+(left>1?'s':'')+' in Cycle '+c+' not finished yet. You can still go back and fill them in later.','Start',doit);else doit();return}
  if(t.id==='finish'&&m){var D=entry(+m[1],m[2],null,true);D.done=true;if(!D.date)D.date=today();if(!D.n)D.n=todayN();markDirty();go('');save('Workout saved 💪');return}
  if(t.id==='undone'&&m){entry(+m[1],m[2]).done=false;markDirty();render();return}
  if(t.dataset.form&&m){formModal(+m[1],m[2],t.dataset.form);return}
@@ -792,6 +827,6 @@ document.addEventListener('click',function(ev){
 render();
 })();
 </script><script>
-var APP_VER="16";
+var APP_VER="17";
 (function(){try{if(!navigator.onLine)return;fetch('./index.html?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){var m=t.match(/APP_VER="(\d+)"/);if(m&&m[1]!==APP_VER){var k='wct-upd-'+m[1];if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1');location.replace('./?v='+m[1])}}).catch(function(){})}catch(e){}})();
 </script></body></html>
